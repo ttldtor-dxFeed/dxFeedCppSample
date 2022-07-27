@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+tmp
+*.zip
+
+dxFeedCApi
+
+.idea
+
+cmake-build-*/
