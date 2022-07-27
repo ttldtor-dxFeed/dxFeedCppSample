@@ -28,3 +28,11 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --config Release
 ```
+
+## Prepare project files for Visual Studio (2015 x64)
+
+```shell
+mkdir build
+cd build
+cmake -G "Visual Studio 14 2015" -A x64 -DCMAKE_BUILD_TYPE=Release ..
+```
