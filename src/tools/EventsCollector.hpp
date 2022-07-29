@@ -1,7 +1,7 @@
 #pragma once
 
-#include <DXFeed.h>
-#include <EventData.h>
+#include "DXFeed.h"
+#include "EventData.h"
 
 #include <algorithm>
 #include <atomic>
@@ -14,9 +14,9 @@
 #include <string>
 #include <vector>
 
-#include "DateTimeConverter.hpp"
-#include "EventFlag.hpp"
-#include "StringConverter.hpp"
+#include "converters/DateTimeConverter.hpp"
+#include "converters/StringConverter.hpp"
+#include "wrappers/EventFlag.hpp"
 
 namespace dxfcs {
 

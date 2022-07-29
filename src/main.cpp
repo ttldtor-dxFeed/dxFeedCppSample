@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 
-#include "Candle.hpp"
-#include "DateTimeConverter.hpp"
-#include "EventsCollector.hpp"
-#include "EventsDumper.hpp"
-#include "Quote.hpp"
+#include "converters/DateTimeConverter.hpp"
+#include "tools/EventsCollector.hpp"
+#include "tools/EventsDumper.hpp"
+#include "wrappers/Candle.hpp"
+#include "wrappers/Quote.hpp"
 
 std::future<void> testQuoteSubscription(const std::string &address, const std::vector<std::string> &symbols,
                                         long timeout) {
@@ -24,12 +24,14 @@ std::future<std::vector<dxfcs::Candle>> testCandleSnapshot(const std::string &ad
 }
 
 int main() {
-    auto fromTime = dxfcs::DateTimeConverter::parseISO("2022-07-27T00:00:00Z");
-    auto toTime = dxfcs::DateTimeConverter::parseISO("2022-07-28T00:00:00Z");
+    auto fromTimeString = "2022-07-27T00:00:00Z";
+    auto toTimeString = "2022-07-28T00:00:00Z";
+    auto fromTime = dxfcs::DateTimeConverter::parseISO(fromTimeString);
+    auto toTime = dxfcs::DateTimeConverter::parseISO(toTimeString);
 
     auto result = testCandleSnapshot("demo.dxfeed.com:7300", "AAPL&Q{=1m}", fromTime, toTime, 20000).get();
 
-    std::cout << "AAPL&Q{=1m} CANDLE SNAPSHOT RESULT:" << std::endl;
+    std::cout << "AAPL&Q{=1m} (" << fromTimeString << " - " << toTimeString << ") CANDLE SNAPSHOT RESULT:" << std::endl;
 
     for (auto const &e : result) {
         std::cout << e.toString() << std::endl;

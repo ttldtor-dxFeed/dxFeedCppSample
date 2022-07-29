@@ -6,8 +6,8 @@ project(dxFeedCppSample)
 set(CMAKE_CXX_STANDARD 11)
 
 add_definitions(-DFMT_HEADER_ONLY=1)
-add_executable(dxFeedCppSample src/main.cpp src/StringConverter.hpp src/EventFlag.hpp src/Candle.hpp src/Quote.hpp
-        src/DateTimeConverter.hpp src/EventsCollector.hpp src/EventsDumper.hpp src/OrderScope.hpp)
+add_executable(dxFeedCppSample src/main.cpp src/converters/StringConverter.hpp src/wrappers/EventFlag.hpp src/wrappers/Candle.hpp src/wrappers/Quote.hpp
+        src/converters/DateTimeConverter.hpp src/tools/EventsCollector.hpp src/tools/EventsDumper.hpp src/wrappers/OrderScope.hpp)
 target_include_directories(dxFeedCppSample PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_directories(dxFeedCppSample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/lib)
