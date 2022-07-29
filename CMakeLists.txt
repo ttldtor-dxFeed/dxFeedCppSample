@@ -6,8 +6,14 @@ project(dxFeedCppSample)
 set(CMAKE_CXX_STANDARD 11)
 
 add_definitions(-DFMT_HEADER_ONLY=1)
-add_executable(dxFeedCppSample src/main.cpp src/converters/StringConverter.hpp src/wrappers/EventFlag.hpp src/wrappers/Candle.hpp src/wrappers/Quote.hpp
-        src/converters/DateTimeConverter.hpp src/tools/EventsCollector.hpp src/tools/EventsDumper.hpp src/wrappers/OrderScope.hpp)
+
+set(dxFeedCppSample_wrappers src/wrappers/EventFlag.hpp src/wrappers/Candle.hpp src/wrappers/Quote.hpp
+        src/wrappers/OrderScope.hpp src/wrappers/DXFeed.hpp src/wrappers/Connection.hpp)
+set(dxFeedCppSample_tools src/tools/EventsCollector.hpp src/tools/EventsDumper.hpp)
+set(dxFeedCppSample_converters src/converters/StringConverter.hpp
+        src/converters/DateTimeConverter.hpp)
+
+add_executable(dxFeedCppSample src/main.cpp ${dxFeedCppSample_converters} ${dxFeedCppSample_tools} ${dxFeedCppSample_wrappers})
 target_include_directories(dxFeedCppSample PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_directories(dxFeedCppSample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/lib)
