@@ -6,10 +6,12 @@ project(dxFeedCppSample)
 set(CMAKE_CXX_STANDARD 11)
 
 add_definitions(-DFMT_HEADER_ONLY=1)
-add_executable(dxFeedCppSample src/main.cpp)
-target_include_directories(dxFeedCppSample PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>)
+add_executable(dxFeedCppSample src/main.cpp src/StringConverter.hpp src/EventFlag.hpp src/Candle.hpp src/Quote.hpp
+        src/DateTimeConverter.hpp src/EventsCollector.hpp src/EventsDumper.hpp src/OrderScope.hpp)
+target_include_directories(dxFeedCppSample PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_directories(dxFeedCppSample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/lib)
-target_link_libraries(dxFeedCppSample debug DXFeedd_64 optimized DXFeed_64)
+target_link_libraries(dxFeedCppSample PRIVATE debug DXFeedd_64 optimized DXFeed_64)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
@@ -44,3 +46,10 @@ else ()
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeedd_64.so)
 endif ()
 
+include(FetchContent)
+FetchContent_Declare(date_src
+        GIT_REPOSITORY https://github.com/HowardHinnant/date.git
+        GIT_TAG v3.0.1  # adjust tag/branch/commit as needed
+        )
+FetchContent_MakeAvailable(date_src)
+target_link_libraries(dxFeedCppSample PRIVATE date::date)
