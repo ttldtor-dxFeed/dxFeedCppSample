@@ -3,7 +3,7 @@
 param(
     [Alias("d")][string]$version,
     [Alias("c")][switch]$clear,
-    [Alias("C")][switch]$clearAll,
+    [Alias("x")][switch]$clearAll,
     [Alias("h")][switch]$help
 )
 
