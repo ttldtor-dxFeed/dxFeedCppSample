@@ -37,5 +37,5 @@ int main() {
 
     std::cout << "AAPL, IBM QUOTES:" << std::endl;
 
-    testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM"}, 0).get();
+    testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM"}, 10000).get();
 }
