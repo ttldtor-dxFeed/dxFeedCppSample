@@ -5,6 +5,8 @@
 #include <mutex>
 #include <vector>
 
+#include "wrappers/Connection.hpp"
+
 namespace dxfcs {
 
 class EventsDumper {
