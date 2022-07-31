@@ -11,13 +11,23 @@ Prepares the dxFeed C-API library for use when building the program
 dxFeed API version (default = 8.6.3)
 
 .PARAMETER Distributive
-dxFeed API distributive (default = 8.6.3)
+dxFeed API distributive ("linux"|"ubuntu" (new libc), "windows", "centos" (old libc), "macosx"; default = windows)
 
 .PARAMETER Clear
 Clear the downloaded files
 
 .PARAMETER ClearAll
 Clear everything, including library files (lib and include).
+
+.EXAMPLE
+./prepare.ps1
+
+.EXAMPLE
+./prepare.ps1 -v 8.6.3 -d macosx
+
+.EXAMPLE
+./prepare.ps1 -v 8.6.2 -d centos
+
 #>
 param(
     [Parameter(HelpMessage = "dxFeed API version")][Alias("v")][string]$Version,
@@ -77,7 +87,7 @@ if ($Version)
 
 $DISTR = $DEFAULT_DISTR
 
-if ($Distributive -eq "linux")
+if (($Distributive -eq "linux") -or ($Distributive -eq "ubuntu"))
 {
     $DISTR = "linux"
 }
