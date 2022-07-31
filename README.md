@@ -2,22 +2,31 @@
 
 ## Prerequisites
 
-Linux:
-- wget, unzip, gcc (or clang), ninja or make, cmake
+Linux | MacOS:
+- wget, unzip, gcc (or clang), ninja or make, cmake, pwsh (optional)
 
 Windows:
-- cmake, msbuild or/and Visual Studio 2015+, [vcredist2015](https://www.microsoft.com/en-us/download/details.aspx?id=52685) (for running) 
+- powershell, cmake, msbuild or/and Visual Studio 2015+ 
 
 ## Prepare libs
 
-Linux:
+Linux | MacOS (x64):
 ```shell
 ./scripts/prepare.sh
 ```
 
-Windows:
+Windows (x64) | Linux | MacOS (x64):
 ```shell
 ./scripts/prepare.ps1
+```
+
+Advanced usage:
+```shell
+./scripts/prepare.sh -v 8.6.2 -d windows
+```
+
+```shell
+./scripts/prepare.ps1 -v 8.6.1 -d macosx
 ```
 
 ## Build

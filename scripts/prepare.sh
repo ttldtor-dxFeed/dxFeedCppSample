@@ -1,28 +1,30 @@
 #!/bin/sh
 
 DEFAULT_VERSION="8.6.3"
-DEFAULT_LINUX_DISTR="ubuntu"
+DEFAULT_DISTR="ubuntu"
 MY_PATH=$(dirname "$0")
 TEMP_PATH="$MY_PATH"/../tmp
 DXFC_PATH="$MY_PATH"/../thirdparty/dxFeedCApi
+DXFC_LIB_PATH="$DXFC_PATH"/lib
+DXFC_INCLUDE_PATH="$DXFC_PATH"/include
 
 # Print help
 print_help() {
   echo "This script is used to download the required version of dxFeed C-API."
   echo
-  echo "Syntax: $0 [-d|l|c|C|h]"
+  echo "Syntax: $0 [-v|l|c|x|h]"
   echo "options:"
-  echo "d     dxFeed API version (default = $DEFAULT_VERSION)"
-  echo "l     dxFeed API Linux distributive (i.e the libc version,"
-  echo "      'ubuntu' - new, 'centos' - old, default = $DEFAULT_LINUX_DISTR)"
+  echo "v     dxFeed API version (default = $DEFAULT_VERSION)"
+  echo "d     dxFeed API distributive (possible values: 'centos' (old libc), "
+  echo "      'ubuntu' (new libc), 'windows', 'macosx', default = $DEFAULT_DISTR)"
   echo "c     Clear the downloaded files"
-  echo "C     Clear everything, including library files (lib and include)."
+  echo "x     Clear everything, including library files (lib and include)."
   echo "h     Print this Help."
   echo
 }
 
 clear() {
-  rm -r "$MY_PATH"/../tmp
+  rm -r "$TEMP_PATH"
 }
 
 clear_all() {
@@ -31,34 +33,34 @@ clear_all() {
 }
 
 DXFC_VERSION=$DEFAULT_VERSION
-DXFC_LINUX_DISTR=$DEFAULT_LINUX_DISTR
+DXFC_DISTR=$DEFAULT_DISTR
 
-while getopts ":hd:l:cC" option; do
+while getopts ":hv:d:cx" option; do
   case $option in
   h)
     print_help
     exit
     ;;
 
-  c) # cleanup
+  c)
     clear
     exit
     ;;
 
-  C) # cleanup
+  x)
     clear_all
     exit
     ;;
 
-  d) # set version
+  v) # set version
     if [ "$OPTARG" != "" ]; then
       DXFC_VERSION=$OPTARG
     fi
     ;;
 
-  l) # set linux dist
+  d) # set distributive
     if [ "$OPTARG" != "" ]; then
-      DXFC_LINUX_DISTR=$OPTARG
+      DXFC_DISTR=$OPTARG
     fi
     ;;
 
@@ -69,25 +71,43 @@ while getopts ":hd:l:cC" option; do
   esac
 done
 
-clear
+clear_all
 
-echo "dxFeed C-API version = '$DXFC_VERSION', distr = '$DXFC_LINUX_DISTR'"
-echo "Start loading the library"
-
-distr="linux"
-if [ "$DXFC_LINUX_DISTR" = "centos" ]; then
-  distr='centos'
+DISTR="linux"
+if [ "$DXFC_DISTR" = "centos" ]; then
+  DISTR='centos'
+elif [ "$DXFC_DISTR" = "windows" ] || [ "$DXFC_DISTR" = "win" ]; then
+  DISTR='windows'
+elif [ "$DXFC_DISTR" = "macosx" ] || [ "$DXFC_DISTR" = "macos" ] || [ "$DXFC_DISTR" = "mac" ]; then
+  DISTR='macosx'
 fi
+
+echo "dxFeed C-API version = '$DXFC_VERSION', distr = '$DISTR'"
+echo "Start loading the library"
 
 mkdir -p "$TEMP_PATH"
 mkdir -p "$DXFC_PATH"
-wget -O "$TEMP_PATH"/dxfeed-c-api-"$DXFC_VERSION"-$distr-no-tls.zip https://github.com/dxFeed/dxfeed-c-api/releases/download/"$DXFC_VERSION"/dxfeed-c-api-"$DXFC_VERSION"-$distr-no-tls.zip
-unzip "$TEMP_PATH"/dxfeed-c-api-"$DXFC_VERSION"-$distr-no-tls.zip -d "$TEMP_PATH"
+mkdir -p "$DXFC_LIB_PATH"
+mkdir -p "$DXFC_INCLUDE_PATH"
 
-DXFC_API_ACTUAL_DIST_PATH="$TEMP_PATH"/dxfeed-c-api-"$DXFC_VERSION"-no-tls/DXFeedAll-"$DXFC_VERSION"-x64-no-tls
-mkdir -p "$DXFC_PATH"/lib
-mkdir -p "$DXFC_PATH"/include
-cp "$DXFC_API_ACTUAL_DIST_PATH"/bin/x64/*.so "$DXFC_PATH"/lib
-cp "$DXFC_API_ACTUAL_DIST_PATH"/include/*.h "$DXFC_PATH"/include
+ZIP_FILE="$TEMP_PATH"/dxfeed-c-api-"$DXFC_VERSION"-$DISTR-no-tls.zip
+URL=https://github.com/dxFeed/dxfeed-c-api/releases/download/"$DXFC_VERSION"/dxfeed-c-api-"$DXFC_VERSION"-$DISTR-no-tls.zip
+
+wget -O "$ZIP_FILE" "$URL"
+unzip "$ZIP_FILE" -d "$TEMP_PATH"
+
+DXFC_API_SOURCE_PATH="$TEMP_PATH"/dxfeed-c-api-"$DXFC_VERSION"-no-tls/DXFeedAll-"$DXFC_VERSION"-x64-no-tls
+if [ "$DISTR" = "centos" ] || [ "$DISTR" = "linux" ]; then
+  cp "$DXFC_API_SOURCE_PATH"/bin/x64/*.so "$DXFC_LIB_PATH"
+elif [ "$DISTR" = "windows" ]; then
+  DXFC_API_SOURCE_PATH="$TEMP_PATH"/dxfeed-c-api-"$DXFC_VERSION"-no-tls
+  cp "$DXFC_API_SOURCE_PATH"/bin/x64/*.dll "$DXFC_LIB_PATH"
+  cp "$DXFC_API_SOURCE_PATH"/bin/x64/*.lib "$DXFC_LIB_PATH"
+  cp "$DXFC_API_SOURCE_PATH"/bin/x64/*.pdb "$DXFC_LIB_PATH"
+elif [ "$DISTR" = "macosx" ]; then
+  cp "$DXFC_API_SOURCE_PATH"/bin/x64/*.dylib "$DXFC_LIB_PATH"
+fi
+
+cp "$DXFC_API_SOURCE_PATH"/include/*.h "$DXFC_INCLUDE_PATH"
 
 clear
