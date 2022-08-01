@@ -8,10 +8,10 @@ Prepares the dxFeed C-API library for use when building the program
 .DESCRIPTION
 
 .PARAMETER Version
-dxFeed API version (default = 8.6.3)
+dxFeed API version (pattern: ^\d+\.\d+\.\d+$, default = 8.6.3)
 
 .PARAMETER Distributive
-dxFeed API distributive ("linux"|"ubuntu" (new libc), "windows", "centos" (old libc), "macosx"; default = windows)
+dxFeed API distributive (possible values: "linux", "ubuntu" (new libc), "windows", "win", "centos" (old libc), "macosx", "macos", "mac"; default = "windows")
 
 .PARAMETER Clear
 Clear the downloaded files
@@ -30,8 +30,12 @@ Clear everything, including library files (lib and include).
 
 #>
 param(
-    [Parameter(HelpMessage = "dxFeed API version")][Alias("v")][string]$Version,
-    [Parameter(HelpMessage = "dxFeed API distributive")][Alias("d")][string]$Distributive,
+    [Parameter(HelpMessage = "dxFeed API version")]
+    [ValidatePattern("^\d+\.\d+\.\d+$")]
+    [Alias("v")][string]$Version,
+    [Parameter(HelpMessage = "dxFeed API distributive")]
+    [ValidatePattern("^linux|ubuntu|windows|win|centos|macosx|macos|mac$")]
+    [Alias("d")][string]$Distributive,
     [Parameter(HelpMessage = "Clear the downloaded files")][Alias("c")][switch]$Clear,
     [Parameter(HelpMessage = "Clear everything, including library files (lib and include).")][Alias("x")][switch]$clearAll
 )
