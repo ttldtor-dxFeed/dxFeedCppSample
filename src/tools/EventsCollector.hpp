@@ -21,7 +21,7 @@
 namespace dxfcs {
 
 class EventsCollector {
-    template <typename EventType> class SnapshotHolder {
+    template <typename EventType> class TimeSeriesSnapshotHolder {
         std::atomic<bool> disconnected_{false};
         std::atomic<bool> done_{false};
 
@@ -36,7 +36,7 @@ class EventsCollector {
         long long toTime_;
 
       public:
-        SnapshotHolder(std::string symbol, long long fromTime, long long toTime)
+        TimeSeriesSnapshotHolder(std::string symbol, long long fromTime, long long toTime)
             : symbol_{std::move(symbol)}, fromTime_{fromTime}, toTime_{toTime} {}
 
         void wait(long long timeout) {
@@ -104,7 +104,7 @@ class EventsCollector {
     };
 
   public:
-    template <typename EventType>
+    template <typename EventType, template <typename> class SnapshotHolder>
     static void onEventHandler(int eventType, const dxf_event_data_t *eventData, void *userData) {
         if (eventType == EventType::EVENT_TYPE) {
             static_cast<SnapshotHolder<EventType> *>(userData)->applyEventData(eventData);
@@ -118,13 +118,13 @@ class EventsCollector {
             std::launch::async,
             [](const std::string &address, const std::string &symbol, long long fromTime, long long toTime,
                long timeout) -> std::vector<EventType> {
-                SnapshotHolder<EventType> holder{symbol, fromTime, toTime};
+                TimeSeriesSnapshotHolder<EventType> holder{symbol, fromTime, toTime};
 
                 dxf_connection_t con = nullptr;
                 auto r = dxf_create_connection(
                     address.c_str(),
                     [](dxf_connection_t, void *data) {
-                        static_cast<SnapshotHolder<EventType> *>(data)->onDisconnect();
+                        static_cast<TimeSeriesSnapshotHolder<EventType> *>(data)->onDisconnect();
                     },
                     nullptr, nullptr, nullptr, static_cast<void *>(&holder), &con);
 
@@ -145,7 +145,7 @@ class EventsCollector {
                 auto eventListener = [](int eventType, dxf_const_string_t /* symbolName */,
                                         const dxf_event_data_t *eventData, int /*dataCount (always 1) */,
                                         void *userData) {
-                    return onEventHandler<EventType>(eventType, eventData, userData);
+                    return onEventHandler<EventType, TimeSeriesSnapshotHolder>(eventType, eventData, userData);
                 };
 
                 r = dxf_attach_event_listener(sub, eventListener, static_cast<void *>(&holder));

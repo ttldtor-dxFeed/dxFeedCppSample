@@ -22,7 +22,7 @@ class Connection final : public std::enable_shared_from_this<Connection> {
     }
 
     static std::shared_ptr<Connection> create(const std::string &address) {
-        auto c = std::shared_ptr<Connection>(new Connection());
+        auto c = std::make_shared<Connection>();
 
         dxf_connection_t con = nullptr;
         auto r = dxf_create_connection(

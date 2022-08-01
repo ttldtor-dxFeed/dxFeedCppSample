@@ -11,6 +11,10 @@
 
 namespace dxfcs {
 
+/**
+ * Wrapper over the "Quote" event + additional traits for getting meta-information to interact with the native API.
+ * + symbol + conversion to string and some getters.
+ */
 struct Quote {
     // dxFeed Event Type "traits"
     using RawType = dxf_quote_t;

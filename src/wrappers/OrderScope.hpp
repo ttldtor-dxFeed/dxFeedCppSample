@@ -5,6 +5,9 @@
 
 namespace dxfcs {
 
+/**
+ * Wrapper over the dxf_order_scope_t enum
+ */
 class OrderScope {
     unsigned scope_;
     std::string string_;

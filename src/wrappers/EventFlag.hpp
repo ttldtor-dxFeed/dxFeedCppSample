@@ -2,6 +2,9 @@
 
 namespace dxfcs {
 
+/**
+ * Wrapper over the dxf_event_flag enum
+ */
 class EventFlag {
     unsigned flag_;
 

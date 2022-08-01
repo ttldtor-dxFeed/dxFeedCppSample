@@ -9,6 +9,10 @@
 
 namespace dxfcs {
 
+/**
+ * Wrapper over the "Candle" event + additional traits for getting meta-information to interact with the native API.
+ * + symbol + conversion to string and some getters.
+ */
 struct Candle {
     // dxFeed Event Type "traits"
     using RawType = dxf_candle_t;
