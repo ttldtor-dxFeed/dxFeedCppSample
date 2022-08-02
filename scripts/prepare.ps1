@@ -29,6 +29,7 @@ Clear everything, including library files (lib and include).
 ./prepare.ps1 -v 8.6.2 -d centos
 
 #>
+    [CmdletBinding()]
 param(
     [Parameter(HelpMessage = "dxFeed API version")]
     [ValidatePattern("^\d+\.\d+\.\d+$")]
