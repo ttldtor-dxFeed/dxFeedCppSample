@@ -1,5 +1,6 @@
 #pragma once
 
+#include <EventData.h>
 #include <string>
 #include <unordered_map>
 
@@ -9,7 +10,7 @@ namespace dxfcs {
  * Wrapper over the dxf_order_scope_t enum
  */
 class OrderScope {
-    unsigned scope_;
+    dxf_order_scope_t scope_;
     std::string string_;
 
   public:
@@ -18,25 +19,25 @@ class OrderScope {
     static const OrderScope AGGREGATE;
     static const OrderScope ORDER;
 
-    OrderScope(unsigned scope, std::string string) : scope_{scope}, string_{std::move(string)} {}
+    OrderScope(dxf_order_scope_t scope, std::string string) : scope_{scope}, string_{std::move(string)} {}
 
-    static OrderScope get(unsigned scope) {
-        static const std::unordered_map<unsigned, OrderScope> data{{COMPOSITE.getScope(), COMPOSITE},
-                                                                   {REGIONAL.getScope(), REGIONAL},
-                                                                   {AGGREGATE.getScope(), AGGREGATE},
-                                                                   {ORDER.getScope(), ORDER}};
+    static OrderScope get(dxf_order_scope_t scope) {
+        static const std::unordered_map<dxf_order_scope_t, OrderScope> data{{COMPOSITE.getScope(), COMPOSITE},
+                                                                            {REGIONAL.getScope(), REGIONAL},
+                                                                            {AGGREGATE.getScope(), AGGREGATE},
+                                                                            {ORDER.getScope(), ORDER}};
 
         return data.at(scope);
     }
 
-    unsigned getScope() const { return scope_; }
+    dxf_order_scope_t getScope() const { return scope_; }
 
     const std::string &toString() const { return string_; }
 };
 
-const OrderScope OrderScope::COMPOSITE{0u, "Composite"};
-const OrderScope OrderScope::REGIONAL{1u, "Regional"};
-const OrderScope OrderScope::AGGREGATE{2u, "Aggregate"};
-const OrderScope OrderScope::ORDER{3u, "Order"};
+const OrderScope OrderScope::COMPOSITE{dxf_osc_composite, "Composite"};
+const OrderScope OrderScope::REGIONAL{dxf_osc_regional, "Regional"};
+const OrderScope OrderScope::AGGREGATE{dxf_osc_aggregate, "Aggregate"};
+const OrderScope OrderScope::ORDER{dxf_osc_order, "Order"};
 
 } // namespace dxfcs
