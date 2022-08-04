@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-#include "EventFlag.hpp"
+#include "EventFlags.hpp"
 #include "converters/DateTimeConverter.hpp"
 
 namespace dxfcs {
@@ -52,6 +52,10 @@ struct Candle {
             ", bidVolume=" + std::to_string(data_.bid_volume) + ", askVolume=" + std::to_string(data_.ask_volume) +
             ", impVolatility=" + std::to_string(data_.imp_volatility) +
             ", openInterest=" + std::to_string(data_.open_interest) + "}";
+    }
+
+    template <class Ostream> friend Ostream &&operator<<(Ostream &&os, const Candle &value) {
+        return std::forward<Ostream>(os) << value.toString();
     }
 };
 } // namespace dxfcs

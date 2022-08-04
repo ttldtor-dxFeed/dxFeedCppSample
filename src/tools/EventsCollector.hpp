@@ -16,7 +16,7 @@
 
 #include "converters/DateTimeConverter.hpp"
 #include "converters/StringConverter.hpp"
-#include "wrappers/EventFlag.hpp"
+#include "wrappers/EventFlags.hpp"
 
 namespace dxfcs {
 
@@ -68,7 +68,7 @@ class EventsCollector {
             std::lock_guard<std::mutex> guard(eventsMutex_);
 
             if (event.getTime() >= fromTime_ && event.getTime() <= toTime_) {
-                bool remove = dxfcs::EventFlag::REMOVE_EVENT.in(event.getEventFlags());
+                bool remove = dxfcs::EventFlags::REMOVE_EVENT.in(event.getEventFlags());
 
                 event.setEventFlags(0u);
 
@@ -85,7 +85,7 @@ class EventsCollector {
                 }
             }
 
-            if (event.getTime() <= fromTime_ || dxfcs::EventFlag::SNAPSHOT_SNIP.in(event.getEventFlags())) {
+            if (event.getTime() <= fromTime_ || dxfcs::EventFlags::SNAPSHOT_SNIP.in(event.getEventFlags())) {
                 done();
             }
         }

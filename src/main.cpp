@@ -1,6 +1,7 @@
 #include <future>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "converters/DateTimeConverter.hpp"

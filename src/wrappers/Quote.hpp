@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-#include "EventFlag.hpp"
+#include "EventFlags.hpp"
 #include "OrderScope.hpp"
 #include "converters/DateTimeConverter.hpp"
 #include "converters/StringConverter.hpp"
@@ -46,6 +46,10 @@ struct Quote {
             ", askExchange=" + StringConverter::wCharToUtf8(data_.ask_exchange_code) +
             ", askPrice=" + std::to_string(data_.ask_price) + ", askSize=" + std::to_string(data_.ask_size) +
             ", scope=" + OrderScope::get(data_.scope).toString() + "}";
+    }
+
+    template <class Ostream> friend Ostream &&operator<<(Ostream &&os, const Quote &value) {
+        return std::forward<Ostream>(os) << value.toString();
     }
 };
 
