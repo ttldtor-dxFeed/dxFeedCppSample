@@ -1,4 +1,4 @@
-name: Build
+name: Build & Run
 
 on:
   push:
@@ -42,6 +42,11 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.buildType}}
 
+      - name: Run
+        run: |
+          chmod +x ./dxFeedCppSample
+          ./dxFeedCppSample
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -77,6 +82,11 @@ jobs:
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.buildType}}
+
+      - name: Run
+        shell: pwsh
+        run: |
+          ./dxFeedCppSample.exe
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3

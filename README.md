@@ -55,6 +55,19 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --config Release
 ```
 
+## Run
+
+Linux | MacOS | WSL: 
+```shell
+chmod +x ./dxFeedCppSample
+./dxFeedCppSample
+```
+
+Windows:
+```shell
+./dxFeedCppSample.exe
+```
+
 ## Prepare project files for Visual Studio (2015 x64)
 
 ```shell
