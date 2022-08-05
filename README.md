@@ -1,4 +1,5 @@
 # dxFeedCppSample
+[![Build](https://github.com/ttldtor/dxFeedCppSample/actions/workflows/Build.yml/badge.svg)](https://github.com/ttldtor/dxFeedCppSample/actions/workflows/Build.yml)
 
 ## Prerequisites
 
