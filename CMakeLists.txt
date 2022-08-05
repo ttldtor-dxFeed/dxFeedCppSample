@@ -56,6 +56,7 @@ else ()
     add_custom_command(TARGET dxFeedCppSample POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/libDXFeedd_64.so
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeedd_64.so)
+    target_link_libraries(dxFeedCppSample PRIVATE pthread)
 endif ()
 
 include(FetchContent)
