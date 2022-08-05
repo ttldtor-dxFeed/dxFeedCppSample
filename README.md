@@ -7,7 +7,7 @@ Linux | MacOS:
 - wget, unzip, gcc (or clang), ninja or make, cmake, pwsh (optional)
 
 Windows:
-- powershell, cmake, msbuild or/and Visual Studio 2015+ 
+- powershell, cmake, ninja, msbuild or/and Visual Studio 2015+ 
 
 ## Prepare libs
 
@@ -51,7 +51,7 @@ Windows:
 ```shell
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --config Release
 ```
 

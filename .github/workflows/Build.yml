@@ -88,7 +88,7 @@ jobs:
         run: |
           cd ${{github.workspace}}/build
           dir
-          dxFeedCppSample.exe
+          ./dxFeedCppSample.exe
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
