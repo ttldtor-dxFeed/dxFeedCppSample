@@ -13,10 +13,29 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         buildType: [ Release, Debug ]
+        dxFeedCAPIVersion: [ "8.6.3" ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Prepare dependencies [Win]
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          ./scripts/prepare.ps1 -v ${{matrix.dxFeedCAPIVersion}}
+
+      - name: Prepare dependencies [Linux]
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: |
+          ./scripts/prepare.ps1 -d linux -v ${{matrix.dxFeedCAPIVersion}}
+
+      - name: Prepare dependencies [macOS]
+        if: runner.os == 'macOS'
+        shell: pwsh
+        run: |
+          ./scripts/prepare.ps1 -d macos -v ${{matrix.dxFeedCAPIVersion}}        
 
       - name: Prepare
         run: |

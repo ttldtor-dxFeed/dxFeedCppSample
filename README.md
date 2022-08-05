@@ -10,23 +10,39 @@ Windows:
 
 ## Prepare libs
 
-Linux | MacOS (x64):
+Linux | WSL:
 ```shell
 ./scripts/prepare.sh
 ```
 
-Windows (x64) | Linux | MacOS (x64):
+```shell
+./scripts/prepare.sh -v 8.6.2
+```
+
+```shell
+./scripts/prepare.ps1 -d linux
+```
+
+```shell
+./scripts/prepare.ps1 -v 8.6.3 -d linux
+```
+
+MacOS (x64):
+```shell
+./scripts/prepare.sh -d macosx
+```
+
+```shell
+./scripts/prepare.ps1 -v 8.6.3  -d macosx
+```
+
+Windows:
 ```shell
 ./scripts/prepare.ps1
 ```
 
-Advanced usage:
 ```shell
-./scripts/prepare.sh -v 8.6.2 -d windows
-```
-
-```shell
-./scripts/prepare.ps1 -v 8.6.1 -d macosx
+./scripts/prepare.ps1 -v 8.6.3
 ```
 
 ## Build
