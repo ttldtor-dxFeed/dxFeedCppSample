@@ -45,6 +45,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
+          name: ${{matrix.os}}-${{matrix.buildType}}-capi-${{matrix.dxFeedCAPIVersion}}
           path: |
             ${{github.workspace}}/build/dxFeedCppSample.*
             ${{github.workspace}}/build/*.so
@@ -80,6 +81,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
+          name: ${{matrix.os}}-${{matrix.buildType}}-capi-${{matrix.dxFeedCAPIVersion}}
           path: |
             ${{github.workspace}}/build/dxFeedCppSample.*
             ${{github.workspace}}/build/*.dll
