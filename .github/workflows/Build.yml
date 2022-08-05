@@ -78,8 +78,8 @@ jobs:
           ls
           mkdir ${{github.workspace}}/build && cd ${{github.workspace}}/build
 
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
+      - name: Setup Developer Command Prompt for VS
+        uses: ilammy/msvc-dev-cmd@v11
       - name: Configure CMake
         run: cmake -G Ninja -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.buildType}}
 
