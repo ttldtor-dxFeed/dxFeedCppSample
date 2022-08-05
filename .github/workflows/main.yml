@@ -8,22 +8,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-ubuntu-mac:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, macos-latest ]
         buildType: [ Release, Debug ]
         dxFeedCAPIVersion: [ "8.6.3" ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Prepare dependencies [Win]
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          ./scripts/prepare.ps1 -v ${{matrix.dxFeedCAPIVersion}}
 
       - name: Prepare dependencies [Linux]
         if: runner.os == 'Linux'
@@ -55,4 +49,37 @@ jobs:
             ${{github.workspace}}/build/dxFeedCppSample.*
             ${{github.workspace}}/build/*.so
             ${{github.workspace}}/build/*.dylib
+
+  build-win:
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        buildType: [ Release, Debug ]
+        dxFeedCAPIVersion: [ "8.6.3" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Prepare dependencies [Win]
+        shell: pwsh
+        run: |
+          ./scripts/prepare.ps1 -v ${{matrix.dxFeedCAPIVersion}}      
+
+      - name: Prepare
+        run: |
+          ls
+          mkdir ${{github.workspace}}/build && cd ${{github.workspace}}/build
+
+      - name: Configure CMake
+        run: cmake -G Ninja -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.buildType}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.buildType}}
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            ${{github.workspace}}/build/dxFeedCppSample.*
             ${{github.workspace}}/build/*.dll
