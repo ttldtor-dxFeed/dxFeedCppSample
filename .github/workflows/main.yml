@@ -47,7 +47,7 @@ jobs:
         with:
           name: ${{matrix.os}}-${{matrix.buildType}}-capi-${{matrix.dxFeedCAPIVersion}}
           path: |
-            ${{github.workspace}}/build/dxFeedCppSample.*
+            ${{github.workspace}}/build/dxFeedCppSample
             ${{github.workspace}}/build/*.so
             ${{github.workspace}}/build/*.dylib
 
@@ -83,5 +83,5 @@ jobs:
         with:
           name: ${{matrix.os}}-${{matrix.buildType}}-capi-${{matrix.dxFeedCAPIVersion}}
           path: |
-            ${{github.workspace}}/build/dxFeedCppSample.*
+            ${{github.workspace}}/build/dxFeedCppSample.exe
             ${{github.workspace}}/build/*.dll
