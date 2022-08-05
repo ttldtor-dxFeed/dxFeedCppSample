@@ -44,6 +44,7 @@ jobs:
 
       - name: Run
         run: |
+          cd ${{github.workspace}}/build
           chmod +x ./dxFeedCppSample
           ./dxFeedCppSample
 
@@ -86,6 +87,7 @@ jobs:
       - name: Run
         shell: pwsh
         run: |
+          cd ${{github.workspace}}/build
           ./dxFeedCppSample.exe
 
       - name: Archive artifacts
