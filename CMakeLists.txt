@@ -39,7 +39,8 @@ if (WIN32)
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/DXFeedd_64.dll
             ${CMAKE_CURRENT_BINARY_DIR}/DXFeedd_64.dll)
 elseif (MACOSX)
-    set_target_properties(dxFeedCppSample PROPERTIES LINK_FLAGS "-Wl,-install_name,-rpath,@loader_path")
+    set_target_properties(dxFeedCppSamplePROPERTIES MACOSX_RPATH TRUE)
+    #set_target_properties(dxFeedCppSample PROPERTIES LINK_FLAGS "-Wl,-install_name,-rpath,@loader_path")
     add_compile_options(-Wall -Wextra -pedantic)
     add_custom_command(TARGET dxFeedCppSample POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/libDXFeed_64.dylib
