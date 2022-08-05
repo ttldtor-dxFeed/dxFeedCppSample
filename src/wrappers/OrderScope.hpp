@@ -4,6 +4,17 @@
 #include <string>
 #include <unordered_map>
 
+namespace std {
+
+template<>
+struct hash<dxf_order_scope_t> {
+    std::size_t operator()(dxf_order_scope_t scope) const noexcept {
+        return static_cast<std::size_t>(scope);
+    }
+};
+
+}
+
 namespace dxfcs {
 
 /**

@@ -5,6 +5,17 @@
 #include <string>
 #include <unordered_map>
 
+namespace std {
+
+template<>
+struct hash<dxf_connection_status_t> {
+    std::size_t operator()(dxf_connection_status_t status) const noexcept {
+        return static_cast<std::size_t>(status);
+    }
+};
+
+}
+
 namespace dxfcs {
 
 /**
