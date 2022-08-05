@@ -9,6 +9,7 @@
 #include "tools/EventsDumper.hpp"
 #include "wrappers/Candle.hpp"
 #include "wrappers/Quote.hpp"
+#include "wrappers/DXFeed.hpp"
 
 std::future<void> testQuoteSubscription(const std::string &address, const std::vector<std::string> &symbols,
                                         long timeout) {

@@ -28,7 +28,9 @@ endif ()
 
 if (WIN32)
     if (MSVC)
+        add_compile_options(/W4 /WX)
     elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+        add_compile_options(-Wall -Wextra -pedantic)
     endif ()
     add_custom_command(TARGET dxFeedCppSample POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/DXFeed_64.dll
@@ -38,6 +40,7 @@ if (WIN32)
             ${CMAKE_CURRENT_BINARY_DIR}/DXFeedd_64.dll)
 elseif (MACOSX)
     set_target_properties(dxFeedCppSample PROPERTIES LINK_FLAGS "-Wl,-install_name,-rpath,@loader_path")
+    add_compile_options(-Wall -Wextra -pedantic)
     add_custom_command(TARGET dxFeedCppSample POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/libDXFeed_64.dylib
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeed_64.so)
@@ -46,6 +49,7 @@ elseif (MACOSX)
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeedd_64.so)
 else ()
     set_target_properties(dxFeedCppSample PROPERTIES LINK_FLAGS "-Wl,-rpath,./")
+    add_compile_options(-Wall -Wextra -pedantic)
     add_custom_command(TARGET dxFeedCppSample POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/libDXFeed_64.so
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeed_64.so)
