@@ -85,10 +85,10 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.buildType}}
 
       - name: Run
-        shell: pwsh
         run: |
           cd ${{github.workspace}}/build
-          ./dxFeedCppSample.exe
+          dir
+          dxFeedCppSample.exe
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
