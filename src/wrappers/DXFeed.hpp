@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-namespace dxfcs {
+namespace dxfcpp {
 namespace DXFeed {
 
 template <typename OnDisconnectListener = typename Handler<void()>::ListenerType,
@@ -21,4 +21,4 @@ inline std::shared_ptr<Connection> connect(const std::string &address, OnDisconn
 inline std::shared_ptr<Connection> connect(const std::string &address) { return Connection::create(address); }
 } // namespace DXFeed
 
-} // namespace dxfcs
+} // namespace dxfcpp

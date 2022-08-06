@@ -3,29 +3,26 @@
 #include <memory>
 
 #include <DXFeed.h>
+
 #include <functional>
-#include <future>
 #include <mutex>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "ConnectionStatus.hpp"
 #include "helpers/Handler.hpp"
 
-namespace dxfcs {
+namespace dxfcpp {
 
-struct Connection final : public std::enable_shared_from_this<Connection> {
-    Connection &operator=(Connection &) = delete;
-
-  private:
+class Connection final : public std::enable_shared_from_this<Connection> {
+    mutable std::recursive_mutex mutex_{};
     dxf_connection_t connectionHandle_ = nullptr;
 
     Handler<void()> onDisconnect_{};
     Handler<void(const ConnectionStatus &, const ConnectionStatus &)> onConnectionStatusChanged_{};
 
     template <typename F = std::function<void(std::shared_ptr<Connection> &)>>
-    static std::shared_ptr<Connection> create(const std::string &address, F &&beforeConnect) {
+    static std::shared_ptr<Connection> createImpl(const std::string &address, F &&beforeConnect) {
         auto c = std::make_shared<Connection>();
 
         beforeConnect(c);
@@ -51,9 +48,25 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
   public:
+    Connection &operator=(Connection &) = delete;
+
     ~Connection() {
+        std::lock_guard<std::recursive_mutex> lock{mutex_};
+
         if (connectionHandle_ != nullptr) {
             dxf_close_connection(connectionHandle_);
+            connectionHandle_ = nullptr;
+        }
+    }
+
+    const ConnectionStatus& getConnectionStatus() const {
+        std::lock_guard<std::recursive_mutex> lock{mutex_};
+
+        if (connectionHandle_ != nullptr) {
+            dxf_connection_status_t status{};
+            dxf_get_current_connection_status(connectionHandle_, &status);
+
+            return ConnectionStatus::get(status);
         }
     }
 
@@ -68,31 +81,31 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
                   typename Handler<void(const ConnectionStatus &, const ConnectionStatus &)>::ListenerType>
     static std::shared_ptr<Connection> create(const std::string &address, OnDisconnectListener &&onDisconnectListener,
                                               OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
-        return create(address,
-                      [&onDisconnectListener, &onConnectionStatusChangedListener](std::shared_ptr<Connection> &c) {
-                          c->onDisconnect() += std::forward<OnDisconnectListener>(onDisconnectListener);
-                          c->onConnectionStatusChanged() +=
-                              std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener);
-                      });
+        return createImpl(address,
+                          [&onDisconnectListener, &onConnectionStatusChangedListener](std::shared_ptr<Connection> &c) {
+                              c->onDisconnect() += std::forward<OnDisconnectListener>(onDisconnectListener);
+                              c->onConnectionStatusChanged() +=
+                                  std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener);
+                          });
     }
 
     static std::shared_ptr<Connection> create(const std::string &address) {
-        return create(address, [](std::shared_ptr<Connection> &) {});
+        return createImpl(address, [](std::shared_ptr<Connection> &) {});
     }
 };
 
-} // namespace dxfcs
+} // namespace dxfcpp
 
 /*
 {
-    auto c = dxfcs::DXFeed::connect(
+    auto c = dxfcpp::DXFeed::connect(
         "demo.dxfeed.com:7300", []() { std::cout << "Disconnected" << std::endl; },
-        [](const dxfcs::ConnectionStatus &oldStatus, const dxfcs::ConnectionStatus &newStatus) {
+        [](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
             std::cout << "Status: " << oldStatus << " -> " << newStatus << std::endl;
         });
 
 c->onConnectionStatusChanged() +=
-[](const dxfcs::ConnectionStatus &oldStatus, const dxfcs::ConnectionStatus &newStatus) {
+[](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
     std::cout << "Status 2: " << oldStatus << " -> " << newStatus << std::endl;
 };
 

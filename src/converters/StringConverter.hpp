@@ -7,7 +7,7 @@
 
 #include <codecvt>
 
-namespace dxfcs {
+namespace dxfcpp {
 
 struct StringConverter {
     static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> wstringConvert;
@@ -71,7 +71,7 @@ struct StringConverter {
 
 std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> StringConverter::wstringConvert{};
 
-} // namespace dxfcs
+} // namespace dxfcpp
 
 #ifdef _MSC_FULL_VER
 #pragma warning(pop)

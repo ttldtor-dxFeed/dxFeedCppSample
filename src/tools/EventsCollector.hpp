@@ -18,7 +18,7 @@
 #include "converters/StringConverter.hpp"
 #include "wrappers/EventFlags.hpp"
 
-namespace dxfcs {
+namespace dxfcpp {
 
 class EventsCollector {
     template <typename EventType> class TimeSeriesSnapshotHolder {
@@ -68,7 +68,7 @@ class EventsCollector {
             std::lock_guard<std::mutex> guard(eventsMutex_);
 
             if (event.getTime() >= fromTime_ && event.getTime() <= toTime_) {
-                bool remove = dxfcs::EventFlags::REMOVE_EVENT.in(event.getEventFlags());
+                bool remove = dxfcpp::EventFlags::REMOVE_EVENT.in(event.getEventFlags());
 
                 event.setEventFlags(0u);
 
@@ -85,7 +85,7 @@ class EventsCollector {
                 }
             }
 
-            if (event.getTime() <= fromTime_ || dxfcs::EventFlags::SNAPSHOT_SNIP.in(event.getEventFlags())) {
+            if (event.getTime() <= fromTime_ || dxfcpp::EventFlags::SNAPSHOT_SNIP.in(event.getEventFlags())) {
                 done();
             }
         }
@@ -157,7 +157,7 @@ class EventsCollector {
                     return {};
                 }
 
-                std::wstring wideSymbol = dxfcs::StringConverter::utf8ToWString(symbol);
+                std::wstring wideSymbol = dxfcpp::StringConverter::utf8ToWString(symbol);
                 r = dxf_add_symbol(sub, wideSymbol.c_str());
 
                 if (r == DXF_FAILURE) {
@@ -180,4 +180,4 @@ class EventsCollector {
     }
 };
 
-} // namespace dxfcs
+} // namespace dxfcpp

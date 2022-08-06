@@ -7,7 +7,7 @@
 #include "EventFlags.hpp"
 #include "converters/DateTimeConverter.hpp"
 
-namespace dxfcs {
+namespace dxfcpp {
 
 /**
  * Wrapper over the "Candle" event + additional traits for getting meta-information to interact with the native API.
@@ -58,4 +58,4 @@ struct Candle {
         return std::forward<Ostream>(os) << value.toString();
     }
 };
-} // namespace dxfcs
+} // namespace dxfcpp

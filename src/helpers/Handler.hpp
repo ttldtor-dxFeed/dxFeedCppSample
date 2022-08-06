@@ -6,7 +6,7 @@
 #include <future>
 #include <vector>
 
-namespace dxfcs {
+namespace dxfcpp {
 
 template <typename Signature> struct Handler;
 

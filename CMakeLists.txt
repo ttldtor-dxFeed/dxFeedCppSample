@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 add_definitions(-DFMT_HEADER_ONLY=1)
 
 set(dxFeedCppSample_wrappers src/wrappers/EventFlags.hpp src/wrappers/Candle.hpp src/wrappers/Quote.hpp
-        src/wrappers/OrderScope.hpp src/wrappers/DXFeed.hpp src/wrappers/Connection.hpp src/wrappers/ConnectionStatus.hpp)
+        src/wrappers/OrderScope.hpp src/wrappers/DXFeed.hpp src/wrappers/Connection.hpp src/wrappers/ConnectionStatus.hpp src/wrappers/Subscription.hpp)
 set(dxFeedCppSample_tools src/tools/EventsCollector.hpp src/tools/EventsDumper.hpp)
 set(dxFeedCppSample_helpers src/tools/EventsCollector.hpp src/helpers/Handler.hpp)
 set(dxFeedCppSample_converters src/converters/StringConverter.hpp

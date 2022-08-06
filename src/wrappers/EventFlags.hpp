@@ -1,6 +1,6 @@
 #pragma once
 
-namespace dxfcs {
+namespace dxfcpp {
 
 /**
  * Wrapper over the dxf_event_flag enum
@@ -45,4 +45,4 @@ const EventFlags EventFlags::SNAPSHOT_SNIP{0x10u};
 const EventFlags EventFlags::SNAPSHOT_MODE{0x40u};
 const EventFlags EventFlags::REMOVE_SYMBOL{0x80u};
 
-} // namespace dxfcs
+} // namespace dxfcpp

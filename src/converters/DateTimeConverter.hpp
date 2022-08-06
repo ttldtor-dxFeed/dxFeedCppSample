@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-namespace dxfcs {
+namespace dxfcpp {
 
 namespace DateTimeConverter {
 inline long long parseISO(const std::string &s) {
@@ -29,4 +29,4 @@ inline std::string toISO(long long timestamp) {
 
 } // namespace DateTimeConverter
 
-} // namespace dxfcs
+} // namespace dxfcpp

@@ -7,7 +7,7 @@
 
 #include "wrappers/Connection.hpp"
 
-namespace dxfcs {
+namespace dxfcpp {
 
 class EventsDumper {
     class State {
@@ -86,17 +86,21 @@ class EventsDumper {
                 std::vector<std::wstring> wSymbols(symbols.size());
                 std::transform(symbols.begin(), symbols.end(), wSymbols.begin(),
                                [](const std::string &s) { return StringConverter::utf8ToWString(s); });
+                std::vector<const wchar_t *> rawWSymbols(symbols.size());
+                std::transform(wSymbols.begin(), wSymbols.end(), rawWSymbols.begin(),
+                               [](const std::wstring &s) { return s.c_str(); });
 
-                for (const auto &ws : wSymbols) {
-                    r = dxf_add_symbol(sub, ws.c_str());
+                auto oldSize = rawWSymbols.size();
+                int size = static_cast<int>(oldSize) >= 0 ? static_cast<int>(oldSize) : std::numeric_limits<int>::max();
 
-                    if (r == DXF_FAILURE) {
-                        dxf_detach_event_listener(sub, eventListener);
-                        dxf_close_subscription(sub);
-                        dxf_close_connection(con);
+                r = dxf_add_symbols(sub, rawWSymbols.data(), size);
 
-                        return;
-                    }
+                if (r == DXF_FAILURE) {
+                    dxf_detach_event_listener(sub, eventListener);
+                    dxf_close_subscription(sub);
+                    dxf_close_connection(con);
+
+                    return;
                 }
 
                 state.wait(timeout);
@@ -109,4 +113,4 @@ class EventsDumper {
     }
 };
 
-} // namespace dxfcs
+} // namespace dxfcpp

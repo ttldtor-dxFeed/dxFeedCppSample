@@ -16,7 +16,7 @@ struct hash<dxf_connection_status_t> {
 
 }
 
-namespace dxfcs {
+namespace dxfcpp {
 
 /**
  * Wrapper over the dxf_connection_status_t enum
@@ -36,7 +36,7 @@ class ConnectionStatus {
 
     const static std::unordered_map<dxf_connection_status_t, ConnectionStatus> ALL;
 
-    static ConnectionStatus get(dxf_connection_status_t status) { return ALL.at(status); }
+    static const ConnectionStatus& get(dxf_connection_status_t status) { return ALL.at(status); }
 
     dxf_connection_status_t getStatus() const { return status_; }
 
@@ -57,4 +57,4 @@ const std::unordered_map<dxf_connection_status_t, ConnectionStatus> ConnectionSt
     {CONNECTED.getStatus(), CONNECTED},
     {LOGIN_REQUIRED.getStatus(), LOGIN_REQUIRED},
     {AUTHORIZED.getStatus(), AUTHORIZED}};
-} // namespace dxfcs
+} // namespace dxfcpp

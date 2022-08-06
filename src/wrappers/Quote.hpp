@@ -9,7 +9,7 @@
 #include "converters/DateTimeConverter.hpp"
 #include "converters/StringConverter.hpp"
 
-namespace dxfcs {
+namespace dxfcpp {
 
 /**
  * Wrapper over the "Quote" event + additional traits for getting meta-information to interact with the native API.
@@ -53,4 +53,4 @@ struct Quote {
     }
 };
 
-} // namespace dxfcs
+} // namespace dxfcpp

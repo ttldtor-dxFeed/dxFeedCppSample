@@ -15,7 +15,7 @@ struct hash<dxf_order_scope_t> {
 
 }
 
-namespace dxfcs {
+namespace dxfcpp {
 
 /**
  * Wrapper over the dxf_order_scope_t enum
@@ -55,4 +55,4 @@ const std::unordered_map<dxf_order_scope_t, OrderScope> OrderScope::ALL{{COMPOSI
                                                                                {AGGREGATE.getScope(), AGGREGATE},
                                                                                {ORDER.getScope(), ORDER}};
 
-} // namespace dxfcs
+} // namespace dxfcpp
