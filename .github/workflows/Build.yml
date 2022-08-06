@@ -102,22 +102,22 @@ jobs:
             ${{github.workspace}}/build/dxFeedCppSample.exe
             ${{github.workspace}}/build/*.dll
 
-      - name: Prepare the VS project files dir
-        run: |
-          mkdir ${{github.workspace}}/vsproj && cd ${{github.workspace}}/vsproj
-
-      - name: Configure CMake for VS 2015
-        run: cmake -G "Visual Studio 14 2015" -A x64 -B ${{github.workspace}}/vsproj -DCMAKE_BUILD_TYPE=${{matrix.buildType}}
-
-      - name: Show VS Project files
-        run: ls ${{github.workspace}}/vsproj
-
-      - name: Archive VS project files
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{matrix.os}}-${{matrix.buildType}}-capi-${{matrix.dxFeedCAPIVersion}}-vsproj
-          path: |
-            ${{github.workspace}}/vsproj/*.sln
-            ${{github.workspace}}/vsproj/*.vcxproj
-            ${{github.workspace}}/vsproj/*.vcxproj.filter
-            ${{github.workspace}}/vsproj/*.vcxproj.user
+#      - name: Prepare the VS project files dir
+#        run: |
+#          mkdir ${{github.workspace}}/vsproj && cd ${{github.workspace}}/vsproj
+#
+#      - name: Configure CMake for VS 2015
+#        run: cmake -G "Visual Studio 14 2015" -A x64 -B ${{github.workspace}}/vsproj -DCMAKE_BUILD_TYPE=${{matrix.buildType}}
+#
+#      - name: Show VS Project files
+#        run: ls ${{github.workspace}}/vsproj
+#
+#      - name: Archive VS project files
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{matrix.os}}-${{matrix.buildType}}-capi-${{matrix.dxFeedCAPIVersion}}-vsproj
+#          path: |
+#            ${{github.workspace}}/vsproj/*.sln
+#            ${{github.workspace}}/vsproj/*.vcxproj
+#            ${{github.workspace}}/vsproj/*.vcxproj.filter
+#            ${{github.workspace}}/vsproj/*.vcxproj.user
