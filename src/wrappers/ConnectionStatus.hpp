@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "DXFCppConfig.hpp"
+
 namespace std {
 
 template<>

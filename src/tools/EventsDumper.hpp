@@ -1,11 +1,14 @@
 #pragma once
 
+#include "wrappers/DXFCppConfig.hpp"
+
 #include <condition_variable>
 #include <future>
 #include <mutex>
 #include <vector>
 
 #include "wrappers/Connection.hpp"
+#include "wrappers/EventTraits.hpp"
 
 namespace dxfcpp {
 
@@ -34,9 +37,9 @@ class EventsDumper {
   public:
     template <typename EventType>
     static void onEventHandler(int eventType, dxf_const_string_t symbolName, const dxf_event_data_t *eventData) {
-        if (eventType == EventType::EVENT_TYPE) {
+        if (eventType == EventTraits<EventType>::cApiEventMask) {
             auto event = EventType(StringConverter::wStringToUtf8(symbolName),
-                                   *reinterpret_cast<const typename EventType::RawType *>(eventData));
+                                   *reinterpret_cast<const typename EventTraits<EventType>::CApiEventType *>(eventData));
 
             // TODO: std::osyncstream (C++20)
             std::cout << event.toString() << std::endl;
@@ -61,7 +64,7 @@ class EventsDumper {
 
                 dxf_subscription_t sub = nullptr;
 
-                r = dxf_create_subscription(con, EventType::EVENT_TYPE, &sub);
+                r = dxf_create_subscription(con, EventTraits<EventType>::cApiEventMask, &sub);
 
                 if (r == DXF_FAILURE) {
                     dxf_close_connection(con);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DXFCppConfig.hpp"
+
 #include "Connection.hpp"
 #include "helpers/Handler.hpp"
 

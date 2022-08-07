@@ -4,7 +4,10 @@
 #include <string>
 #include <utility>
 
+#include "DXFCppConfig.hpp"
+
 #include "EventFlags.hpp"
+#include "EventTraits.hpp"
 #include "converters/DateTimeConverter.hpp"
 
 namespace dxfcpp {
@@ -14,25 +17,21 @@ namespace dxfcpp {
  * + symbol + conversion to string and some getters.
  */
 struct Candle {
-    // dxFeed Event Type "traits"
-    using RawType = dxf_candle_t;
-    static const unsigned EVENT_ID = dx_eid_candle;
-    static const unsigned EVENT_TYPE = DXF_ET_CANDLE;
-
-    using IndexType = decltype(RawType::index);
+    using CApiEventType = EventTraits<Candle>::CApiEventType;
+    using IndexType = decltype(CApiEventType::index);
     using EventFlagsType = unsigned;
-    using TimeType = decltype(RawType::time);
+    using TimeType = decltype(CApiEventType::time);
 
   private:
     std::string symbol_;
-    RawType data_;
+    CApiEventType data_;
 
   public:
-    Candle(std::string symbol, RawType const &candle) : symbol_{std::move(symbol)}, data_{candle} {}
+    Candle(std::string symbol, CApiEventType const &candle) : symbol_{std::move(symbol)}, data_{candle} {}
 
     const std::string &getSymbol() const { return symbol_; }
 
-    const RawType &getData() const { return data_; }
+    const CApiEventType &getData() const { return data_; }
 
     EventFlagsType getEventFlags() const { return data_.event_flags; }
 
@@ -44,7 +43,7 @@ struct Candle {
 
     std::string toString() const {
         return std::string("Candle{") + symbol_ + ", index=" + std::to_string(getIndex()) +
-            ", eventTime=" + DateTimeConverter::toISO(getTime()) + ", eventFlags=" + std::to_string(getEventFlags()) +
+            ", eventTime=" + DateTimeConverter::toISO(getTime()) + ", eventFlags=" + EventFlags::toString(getEventFlags()) +
             ", sequence=" + std::to_string(data_.sequence) + ", count=" + std::to_string(data_.count) +
             ", open=" + std::to_string(data_.open) + ", high=" + std::to_string(data_.high) +
             ", low=" + std::to_string(data_.low) + ", close=" + std::to_string(data_.close) +

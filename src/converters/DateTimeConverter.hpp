@@ -1,5 +1,6 @@
 #pragma once
 
+#include "wrappers/DXFCppConfig.hpp"
 #include "date/date.h"
 #include <chrono>
 #include <sstream>

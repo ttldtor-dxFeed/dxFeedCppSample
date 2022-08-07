@@ -1,5 +1,7 @@
 #pragma once
 
+#include "wrappers/DXFCppConfig.hpp"
+
 #include <functional>
 #include <unordered_map>
 #include <mutex>

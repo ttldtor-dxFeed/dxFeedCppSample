@@ -4,16 +4,15 @@
 #include <string>
 #include <unordered_map>
 
+#include "DXFCppConfig.hpp"
+
 namespace std {
 
-template<>
-struct hash<dxf_order_scope_t> {
-    std::size_t operator()(dxf_order_scope_t scope) const noexcept {
-        return static_cast<std::size_t>(scope);
-    }
+template <> struct hash<dxf_order_scope_t> {
+    std::size_t operator()(dxf_order_scope_t scope) const noexcept { return static_cast<std::size_t>(scope); }
 };
 
-}
+} // namespace std
 
 namespace dxfcpp {
 
@@ -51,8 +50,8 @@ const OrderScope OrderScope::AGGREGATE{dxf_osc_aggregate, "Aggregate"};
 const OrderScope OrderScope::ORDER{dxf_osc_order, "Order"};
 
 const std::unordered_map<dxf_order_scope_t, OrderScope> OrderScope::ALL{{COMPOSITE.getScope(), COMPOSITE},
-                                                                               {REGIONAL.getScope(), REGIONAL},
-                                                                               {AGGREGATE.getScope(), AGGREGATE},
-                                                                               {ORDER.getScope(), ORDER}};
+                                                                        {REGIONAL.getScope(), REGIONAL},
+                                                                        {AGGREGATE.getScope(), AGGREGATE},
+                                                                        {ORDER.getScope(), ORDER}};
 
 } // namespace dxfcpp

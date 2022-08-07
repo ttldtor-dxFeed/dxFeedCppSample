@@ -4,7 +4,10 @@
 #include <string>
 #include <utility>
 
+#include "DXFCppConfig.hpp"
+
 #include "EventFlags.hpp"
+#include "EventTraits.hpp"
 #include "OrderScope.hpp"
 #include "converters/DateTimeConverter.hpp"
 #include "converters/StringConverter.hpp"
@@ -16,23 +19,19 @@ namespace dxfcpp {
  * + symbol + conversion to string and some getters.
  */
 struct Quote {
-    // dxFeed Event Type "traits"
-    using RawType = dxf_quote_t;
-    static const unsigned EVENT_ID = dx_eid_quote;
-    static const unsigned EVENT_TYPE = DXF_ET_QUOTE;
-
-    using TimeType = decltype(RawType::time);
+    using CApiEventType = EventTraits<Quote>::CApiEventType;
+    using TimeType = decltype(CApiEventType::time);
 
   private:
     std::string symbol_;
-    RawType data_;
+    CApiEventType data_;
 
   public:
-    Quote(std::string symbol, RawType const &quote) : symbol_{std::move(symbol)}, data_{quote} {}
+    Quote(std::string symbol, CApiEventType const &quote) : symbol_{std::move(symbol)}, data_{quote} {}
 
     const std::string &getSymbol() const { return symbol_; }
 
-    const RawType &getData() const { return data_; }
+    const CApiEventType &getData() const { return data_; }
 
     TimeType getTime() const { return data_.time; }
 

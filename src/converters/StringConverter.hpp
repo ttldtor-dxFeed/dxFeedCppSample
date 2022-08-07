@@ -1,5 +1,7 @@
 #pragma once
 
+#include "wrappers/DXFCppConfig.hpp"
+
 #ifdef _MSC_FULL_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)

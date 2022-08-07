@@ -11,6 +11,8 @@
 #include "wrappers/DXFeed.hpp"
 #include "wrappers/Quote.hpp"
 
+#include "wrappers/EventTraits.hpp"
+
 std::future<void> testQuoteSubscription(const std::string &address, const std::vector<std::string> &symbols,
                                         long timeout) {
     auto dumper = dxfcpp::EventsDumper{};
@@ -26,8 +28,8 @@ std::future<std::vector<dxfcpp::Candle>> testCandleSnapshot(const std::string &a
 }
 
 int main() {
-    auto fromTimeString = "2022-07-27T00:00:00Z";
-    auto toTimeString = "2022-07-28T00:00:00Z";
+    auto fromTimeString = "2022-08-04T00:00:00Z";
+    auto toTimeString = "2022-08-05T00:00:00Z";
     auto fromTime = dxfcpp::DateTimeConverter::parseISO(fromTimeString);
     auto toTime = dxfcpp::DateTimeConverter::parseISO(toTimeString);
 

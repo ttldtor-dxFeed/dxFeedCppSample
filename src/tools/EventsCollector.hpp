@@ -3,6 +3,8 @@
 #include "DXFeed.h"
 #include "EventData.h"
 
+#include "wrappers/DXFCppConfig.hpp"
+
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -17,6 +19,7 @@
 #include "converters/DateTimeConverter.hpp"
 #include "converters/StringConverter.hpp"
 #include "wrappers/EventFlags.hpp"
+#include "wrappers/EventTraits.hpp"
 
 namespace dxfcpp {
 
@@ -61,9 +64,9 @@ class EventsCollector {
         void applyEventData(const dxf_event_data_t *eventData) {
             // We need a copy
             //  TODO: std::bit_cast C++20
-            auto event = EventType(symbol_, *reinterpret_cast<const typename EventType::RawType *>(eventData));
+            auto event = EventType(symbol_, *reinterpret_cast<const typename EventTraits<EventType>::CApiEventType *>(eventData));
 
-            // std::cout << event.toString() << std::endl;
+            //std::cout << event.toString() << std::endl;
 
             std::lock_guard<std::mutex> guard(eventsMutex_);
 
@@ -106,7 +109,7 @@ class EventsCollector {
   public:
     template <typename EventType, template <typename> class SnapshotHolder>
     static void onEventHandler(int eventType, const dxf_event_data_t *eventData, void *userData) {
-        if (eventType == EventType::EVENT_TYPE) {
+        if (eventType == EventTraits<EventType>::cApiEventMask) {
             static_cast<SnapshotHolder<EventType> *>(userData)->applyEventData(eventData);
         }
     }
@@ -134,7 +137,7 @@ class EventsCollector {
 
                 dxf_subscription_t sub = nullptr;
 
-                r = dxf_create_subscription_timed(con, EventType::EVENT_TYPE, fromTime, &sub);
+                r = dxf_create_subscription_timed(con, EventTraits<EventType>::cApiEventMask, fromTime, &sub);
 
                 if (r == DXF_FAILURE) {
                     dxf_close_connection(con);

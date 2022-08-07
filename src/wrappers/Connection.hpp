@@ -9,6 +9,8 @@
 #include <string>
 #include <utility>
 
+#include "DXFCppConfig.hpp"
+
 #include "ConnectionStatus.hpp"
 #include "helpers/Handler.hpp"
 
@@ -59,7 +61,7 @@ class Connection final : public std::enable_shared_from_this<Connection> {
         }
     }
 
-    const ConnectionStatus& getConnectionStatus() const {
+    ConnectionStatus getConnectionStatus() const {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
 
         if (connectionHandle_ != nullptr) {
@@ -68,6 +70,8 @@ class Connection final : public std::enable_shared_from_this<Connection> {
 
             return ConnectionStatus::get(status);
         }
+
+        return ConnectionStatus::NOT_CONNECTED;
     }
 
     Handler<void()> &onDisconnect() { return onDisconnect_; }
