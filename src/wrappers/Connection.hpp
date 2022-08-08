@@ -32,10 +32,10 @@ class Connection final : public std::enable_shared_from_this<Connection> {
         dxf_connection_t connectionHandle = nullptr;
         auto r = dxf_create_connection(
             address.c_str(),
-            [](dxf_connection_t, void *data) { reinterpret_cast<Connection *>(data)->onDisconnect_(); },
-            [](dxf_connection_t, dxf_connection_status_t oldStatus, dxf_connection_status_t newStatus, void *data) {
-                reinterpret_cast<Connection *>(data)->onConnectionStatusChanged_(ConnectionStatus::get(oldStatus),
-                                                                                 ConnectionStatus::get(newStatus));
+            [](dxf_connection_t, void *userData) { reinterpret_cast<Connection *>(userData)->onDisconnect_(); },
+            [](dxf_connection_t, dxf_connection_status_t oldStatus, dxf_connection_status_t newStatus, void *userData) {
+                reinterpret_cast<Connection *>(userData)->onConnectionStatusChanged_(ConnectionStatus::get(oldStatus),
+                                                                                     ConnectionStatus::get(newStatus));
             },
             nullptr, nullptr, reinterpret_cast<void *>(c.get()), &connectionHandle);
 
