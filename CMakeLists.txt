@@ -26,10 +26,17 @@ set(dxFeedCppSample_converters src/converters/StringConverter.hpp
 
 add_executable(dxFeedCppSample src/main.cpp ${dxFeedCppSample_converters} ${dxFeedCppSample_tools}
         ${dxFeedCppSample_helpers} ${dxFeedCppSample_wrappers})
-target_include_directories(dxFeedCppSample PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
+
+add_subdirectory(thirdparty/date-3.0.1)
+
+target_include_directories(dxFeedCppSample PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/variant-lite-2.0.0>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+
 target_link_directories(dxFeedCppSample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/lib)
 target_link_libraries(dxFeedCppSample PRIVATE debug DXFeedd_64 optimized DXFeed_64)
+target_link_libraries(dxFeedCppSample PRIVATE date::date)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
@@ -69,11 +76,3 @@ else ()
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeedd_64.so)
     target_link_libraries(dxFeedCppSample PRIVATE pthread)
 endif ()
-
-include(FetchContent)
-FetchContent_Declare(date_src
-        GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-        GIT_TAG v3.0.1  # adjust tag/branch/commit as needed
-        )
-FetchContent_MakeAvailable(date_src)
-target_link_libraries(dxFeedCppSample PRIVATE date::date)
