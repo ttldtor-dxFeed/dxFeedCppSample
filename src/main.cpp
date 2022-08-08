@@ -11,13 +11,44 @@
 #include "wrappers/DXFeed.hpp"
 #include "wrappers/Quote.hpp"
 
+#include "wrappers/Connection.hpp"
 #include "wrappers/EventTraits.hpp"
+#include "wrappers/Subscription.hpp"
 
-std::future<void> testQuoteSubscription(const std::string &address, const std::vector<std::string> &symbols,
-                                        long timeout) {
-    auto dumper = dxfcpp::EventsDumper{};
+struct CountingVisitor {
+    mutable std::atomic<unsigned long> counter{};
 
-    return dumper.dumpEvents<dxfcpp::Quote>(address, symbols, timeout);
+    void operator()(const dxfcpp::Quote &q) const {
+        counter++;
+        std::cout << std::to_string(counter) + "): " + q.toString() + "\n";
+    }
+
+    void operator()(const dxfcpp::Candle &c) const {
+        counter++;
+    }
+};
+
+void testQuoteSubscription(const std::string &address, std::initializer_list<std::string> symbols) {
+    CountingVisitor v{};
+
+    for (const auto &s : symbols) {
+        std::cout << s << " ";
+    }
+
+    std::cout << "QUOTES:" << std::endl;
+
+    auto c = dxfcpp::DXFeed::connect(
+        address, []() { std::cout << "Disconnected" << std::endl; },
+        [](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
+            std::cout << "Status: " << oldStatus << " -> " << newStatus << std::endl;
+        });
+
+    auto s = c->createSubscription({dxfcpp::EventType::QUOTE});
+
+    s->onEvent() += [&v](const dxfcpp::Subscription::Event &event) { nonstd::visit(v, event); };
+    s->addSymbols(symbols);
+
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 }
 
 std::future<std::vector<dxfcpp::Candle>> testCandleSnapshot(const std::string &address, const std::string &candleSymbol,
@@ -41,7 +72,5 @@ int main() {
         std::cout << e.toString() << std::endl;
     }
 
-    std::cout << "AAPL, IBM QUOTES:" << std::endl;
-
-    testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM"}, 10000).get();
+    testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM"});
 }

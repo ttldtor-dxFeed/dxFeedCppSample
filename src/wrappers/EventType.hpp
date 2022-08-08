@@ -11,10 +11,10 @@ class EventType {
     unsigned cApiEventId_;
     unsigned cApiEventMask_;
 
-    EventType(unsigned cApiEventId, unsigned cApiEventMask): cApiEventId_{cApiEventId}, cApiEventMask_{cApiEventMask} {}
+    EventType(unsigned cApiEventId, unsigned cApiEventMask)
+        : cApiEventId_{cApiEventId}, cApiEventMask_{cApiEventMask} {}
 
   public:
-
     static const EventType TRADE;
     static const EventType QUOTE;
     static const EventType SUMMARY;
@@ -31,13 +31,13 @@ class EventType {
     static const EventType CONFIGURATION;
     static const EventType UNKNOWN;
 
-    DXFCPP_CONSTEXPR unsigned getCApiEventId() const {
-        return cApiEventId_;
-    }
+    explicit EventType() : cApiEventId_{unsigned(-1)}, cApiEventMask_{unsigned(-1)} {}
 
-    DXFCPP_CONSTEXPR unsigned getCApiEventMask() const {
-        return cApiEventMask_;
-    }
+    DXFCPP_CONSTEXPR unsigned getCApiEventId() const { return cApiEventId_; }
+
+    DXFCPP_CONSTEXPR unsigned getCApiEventMask() const { return cApiEventMask_; }
+
+    bool operator==(const EventType &eventType) const { return cApiEventId_ == eventType.cApiEventId_; }
 };
 
 const EventType EventType::TRADE{dx_eid_trade, DXF_ET_TRADE};
@@ -56,43 +56,51 @@ const EventType EventType::SERIES{dx_eid_series, DXF_ET_SERIES};
 const EventType EventType::CONFIGURATION{dx_eid_configuration, DXF_ET_CONFIGURATION};
 const EventType EventType::UNKNOWN{unsigned(-1), unsigned(-1)};
 
+} // namespace dxfcpp
+
+namespace std {
+
+template <> struct hash<dxfcpp::EventType> {
+    std::size_t operator()(const dxfcpp::EventType &eventType) const noexcept { return eventType.getCApiEventId(); }
+};
+
+} // namespace std
+
+namespace dxfcpp {
+
 class EventTypesMask final {
     unsigned mask_;
 
   public:
-
     explicit EventTypesMask(unsigned mask) : mask_{mask} {}
 
-    explicit EventTypesMask(const std::unordered_set<EventType>& eventTypes) {
+    template <typename EventTypeIt> EventTypesMask(EventTypeIt begin, EventTypeIt end) {
+        std::unordered_set<EventType> eventTypes{};
+
+        for (auto it = begin; it != end; it++) {
+            eventTypes.insert(*it);
+        }
+
         unsigned resultMask = 0u;
 
-        for (const auto& eventType : eventTypes) {
+        for (const auto &eventType : eventTypes) {
             resultMask |= eventType.getCApiEventMask();
         }
 
         mask_ = resultMask;
     }
 
-    DXFCPP_CONSTEXPR unsigned getMask() const {
-        return mask_;
-    }
+    EventTypesMask(std::initializer_list<EventType> eventTypes) : EventTypesMask(eventTypes.begin(), eventTypes.end()) {}
 
-    friend EventTypesMask operator | (const EventTypesMask& eventTypesMask, const EventType& eventType) {
+    DXFCPP_CONSTEXPR unsigned getMask() const { return mask_; }
+
+    friend EventTypesMask operator|(const EventTypesMask &eventTypesMask, const EventType &eventType) {
         return EventTypesMask{eventTypesMask.mask_ | eventType.getCApiEventMask()};
     }
 
-    friend EventTypesMask operator | (const EventType& eventType1, const EventType& eventType2) {
+    friend EventTypesMask operator|(const EventType &eventType1, const EventType &eventType2) {
         return EventTypesMask{eventType1.getCApiEventMask() | eventType2.getCApiEventMask()};
     }
 };
 
 } // namespace dxfcpp
-
-//namespace std {
-//    template<>
-//    struct hash<dxfcpp::EventType> {
-//        std::size_t operator()(const dxfcpp::EventType& eventType) const noexcept {
-//            return eventType.getCApiEventId();
-//        }
-//    };
-//}
