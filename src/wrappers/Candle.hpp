@@ -17,6 +17,7 @@ namespace dxfcpp {
  * + symbol + conversion to string and some getters.
  */
 struct Candle {
+    using Ptr = std::shared_ptr<Candle>;
     using CApiEventType = EventTraits<Candle>::CApiEventType;
     using IndexType = decltype(CApiEventType::index);
     using EventFlagsType = unsigned;

@@ -18,12 +18,24 @@
 struct CountingVisitor {
     mutable std::atomic<unsigned long> counter{};
 
-    void operator()(const dxfcpp::Quote &q) const {
+    void operator()(dxfcpp::Quote::Ptr q) const {
+        if (!q) {
+            std::cout << "Quote(NULL)\n";
+
+            return;
+        }
+
         counter++;
-        std::cout << std::to_string(counter) + "): " + q.toString() + "\n";
+        std::cout << std::to_string(counter) + "): " + q->toString() + "\n";
     }
 
-    void operator()(const dxfcpp::Candle &c) const {
+    void operator()(dxfcpp::Candle::Ptr c) const {
+        if (!c) {
+            std::cout << "Candle(NULL)\n";
+
+            return;
+        }
+
         counter++;
     }
 };
@@ -39,13 +51,13 @@ void testQuoteSubscription(const std::string &address, std::initializer_list<std
 
     auto c = dxfcpp::DXFeed::connect(
         address, []() { std::cout << "Disconnected" << std::endl; },
-        [](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
+        [](dxfcpp::ConnectionStatus oldStatus, dxfcpp::ConnectionStatus newStatus) {
             std::cout << "Status: " << oldStatus << " -> " << newStatus << std::endl;
         });
 
     auto s = c->createSubscription({dxfcpp::EventType::QUOTE});
 
-    s->onEvent() += [&v](const dxfcpp::Subscription::Event &event) { nonstd::visit(v, event); };
+    s->onEvent() += [&v](dxfcpp::Subscription::Event event) -> void { nonstd::visit(v, event); };
     s->addSymbols(symbols);
 
     std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -59,6 +71,12 @@ std::future<std::vector<dxfcpp::Candle>> testCandleSnapshot(const std::string &a
 }
 
 int main() {
+    auto f = std::async([]{
+       std::cout << "Start\n";
+       std::this_thread::sleep_for(std::chrono::seconds(10));
+       std::cout << "End\n";
+    });
+
     auto fromTimeString = "2022-08-04T00:00:00Z";
     auto toTimeString = "2022-08-05T00:00:00Z";
     auto fromTime = dxfcpp::DateTimeConverter::parseISO(fromTimeString);

@@ -31,7 +31,7 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     dxf_connection_t connectionHandle_ = nullptr;
 
     Handler<void()> onDisconnect_{};
-    Handler<void(const ConnectionStatus &, const ConnectionStatus &)> onConnectionStatusChanged_{};
+    Handler<void(ConnectionStatus, ConnectionStatus)> onConnectionStatusChanged_{};
 
     std::vector<Subscription::Ptr> subscriptions_{};
 
@@ -95,7 +95,7 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
 
     Handler<void()> &onDisconnect() { return onDisconnect_; }
 
-    Handler<void(const ConnectionStatus &, const ConnectionStatus &)> &onConnectionStatusChanged() {
+    Handler<void(ConnectionStatus, ConnectionStatus)> &onConnectionStatusChanged() {
         return onConnectionStatusChanged_;
     }
 

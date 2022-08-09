@@ -19,6 +19,7 @@ namespace dxfcpp {
  * + symbol + conversion to string and some getters.
  */
 struct Quote {
+    using Ptr = std::shared_ptr<Quote>;
     using CApiEventType = EventTraits<Quote>::CApiEventType;
     using TimeType = decltype(CApiEventType::time);
 

@@ -37,7 +37,7 @@ class OrderScope {
 
     dxf_order_scope_t getScope() const { return scope_; }
 
-    const std::string &toString() const { return string_; }
+    std::string toString() const { return string_; }
 
     template <class Ostream> friend Ostream &&operator<<(Ostream &&os, const OrderScope &value) {
         return std::forward<Ostream>(os) << value.toString();

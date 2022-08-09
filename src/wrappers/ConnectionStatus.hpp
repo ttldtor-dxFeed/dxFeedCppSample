@@ -1,6 +1,8 @@
 #pragma once
 
+extern "C" {
 #include <EventData.h>
+}
 
 #include <string>
 #include <unordered_map>
@@ -27,8 +29,8 @@ class ConnectionStatus {
     dxf_connection_status_t status_;
     std::string string_;
 
-    ConnectionStatus(dxf_connection_status_t status, std::string string)
-        : status_{status}, string_{std::move(string)} {}
+    ConnectionStatus(dxf_connection_status_t status, const std::string& string)
+        : status_{status}, string_{string} {}
 
   public:
     static const ConnectionStatus NOT_CONNECTED;
@@ -38,11 +40,11 @@ class ConnectionStatus {
 
     const static std::unordered_map<dxf_connection_status_t, ConnectionStatus> ALL;
 
-    static const ConnectionStatus& get(dxf_connection_status_t status) { return ALL.at(status); }
+    static ConnectionStatus get(dxf_connection_status_t status) { return ALL.at(status); }
 
     dxf_connection_status_t getStatus() const { return status_; }
 
-    const std::string &toString() const { return string_; }
+    std::string toString() const { return string_; }
 
     template <class Ostream> friend Ostream &&operator<<(Ostream &&os, const ConnectionStatus &value) {
         return std::forward<Ostream>(os) << value.toString();

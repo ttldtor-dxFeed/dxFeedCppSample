@@ -52,7 +52,7 @@ class EventFlags {
 
     int clear(int eventFlags) const { return static_cast<int>(clear(static_cast<unsigned>(eventFlags))); }
 
-    const std::string& getString() const {
+    std::string getString() const {
         return string_;
     }
 
