@@ -35,9 +35,11 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
 
     std::vector<Subscription::Ptr> subscriptions_{};
 
+    explicit Connection(bool valid = true): onDisconnect_(valid), onConnectionStatusChanged_(valid) {}
+
     template <typename F = std::function<void(Ptr &)>>
     static Ptr createImpl(const std::string &address, F &&beforeConnect) {
-        auto c = std::make_shared<Connection>();
+        auto c = std::shared_ptr<Connection>(new Connection());
 
         beforeConnect(c);
 
@@ -141,6 +143,6 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 };
 
-const Connection::Ptr Connection::INVALID{new Connection{}};
+const Connection::Ptr Connection::INVALID{new Connection(false)};
 
 } // namespace dxfcpp

@@ -81,6 +81,8 @@ struct Subscription final {
         }
 
       public:
+        explicit Impl(bool valid = true) : onEvent_(valid) {}
+
         void Close() {
             std::lock_guard<std::recursive_mutex> lock{mutex_};
 
@@ -214,6 +216,6 @@ struct Subscription final {
     }
 };
 
-const Subscription::Ptr Subscription::INVALID{new Subscription::Impl<Event>{}};
+const Subscription::Ptr Subscription::INVALID{new Subscription::Impl<Event>(false)};
 
 } // namespace dxfcpp

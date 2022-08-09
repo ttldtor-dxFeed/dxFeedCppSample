@@ -59,18 +59,18 @@ std::future<std::vector<dxfcpp::Candle>> testCandleSnapshot(const std::string &a
 }
 
 int main() {
-    auto fromTimeString = "2022-08-04T00:00:00Z";
-    auto toTimeString = "2022-08-05T00:00:00Z";
-    auto fromTime = dxfcpp::DateTimeConverter::parseISO(fromTimeString);
-    auto toTime = dxfcpp::DateTimeConverter::parseISO(toTimeString);
+//    auto fromTimeString = "2022-08-04T00:00:00Z";
+//    auto toTimeString = "2022-08-05T00:00:00Z";
+//    auto fromTime = dxfcpp::DateTimeConverter::parseISO(fromTimeString);
+//    auto toTime = dxfcpp::DateTimeConverter::parseISO(toTimeString);
+//
+//    auto result = testCandleSnapshot("demo.dxfeed.com:7300", "AAPL&Q{=1m}", fromTime, toTime, 20000).get();
+//
+//    std::cout << "AAPL&Q{=1m} (" << fromTimeString << " - " << toTimeString << ") CANDLE SNAPSHOT RESULT:" << std::endl;
+//
+//    for (auto const &e : result) {
+//        std::cout << e.toString() << std::endl;
+//    }
 
-    auto result = testCandleSnapshot("demo.dxfeed.com:7300", "AAPL&Q{=1m}", fromTime, toTime, 20000).get();
-
-    std::cout << "AAPL&Q{=1m} (" << fromTimeString << " - " << toTimeString << ") CANDLE SNAPSHOT RESULT:" << std::endl;
-
-    for (auto const &e : result) {
-        std::cout << e.toString() << std::endl;
-    }
-
-    testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM"});
+    testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM", "TSLA", "AMZN"});
 }
