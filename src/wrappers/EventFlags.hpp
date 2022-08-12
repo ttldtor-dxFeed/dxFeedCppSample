@@ -69,7 +69,7 @@ class EventFlagsMask {
   public:
     explicit EventFlagsMask() : mask_{0u} {}
     explicit EventFlagsMask(unsigned mask) : mask_{mask} {}
-    explicit EventFlagsMask(dxf_event_flag_t mask) : mask_{mask} {}
+    explicit EventFlagsMask(dxf_event_flag_t mask) : mask_{static_cast<unsigned>(mask)} {}
 
     template <typename EventFlagIt> EventFlagsMask(EventFlagIt begin, EventFlagIt end) {
         mask_ =
