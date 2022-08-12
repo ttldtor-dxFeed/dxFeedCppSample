@@ -68,7 +68,7 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
         std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
         lastId_++;
-        listeners_.template emplace(lastId_, std::forward<ListenerType>(listener));
+        listeners_.emplace(lastId_, std::forward<ListenerType>(listener));
 
         return lastId_;
     }
