@@ -18,7 +18,7 @@ namespace dxfcpp {
  *
  * @details Candle event with open, high, low, close prices and other information for a specific period.
  */
-struct Candle : virtual public Event, virtual public TimeSeries, virtual public Lasting {
+struct Candle final : virtual public Event, virtual public TimeSeries, virtual public Lasting {
     using Ptr = std::shared_ptr<Candle>;
 
   private:
@@ -51,27 +51,7 @@ struct Candle : virtual public Event, virtual public TimeSeries, virtual public 
           volume_{other.volume_}, vwap_{other.vwap_}, bidVolume_{other.bidVolume_}, askVolume_{other.askVolume_},
           impVolatility_{other.impVolatility_}, openInterest_{other.openInterest_} {}
 
-    Candle &operator=(const Candle &other) noexcept {
-        eventSymbol_ = other.eventSymbol_;
-        eventFlags_ = other.eventFlags_;
-        eventTime_ = other.eventTime_;
-        index_ = other.index_;
-        time_ = other.time_;
-        sequence_ = other.sequence_;
-        count_ = other.count_;
-        open_ = other.open_;
-        high_ = other.high_;
-        low_ = other.low_;
-        close_ = other.close_;
-        volume_ = other.volume_;
-        vwap_ = other.vwap_;
-        bidVolume_ = other.bidVolume_;
-        askVolume_ = other.askVolume_;
-        impVolatility_ = other.impVolatility_;
-        openInterest_ = other.openInterest_;
-
-        return *this;
-    }
+    Candle &operator=(const Candle &other) = delete;
 
     Candle(Candle &&other) noexcept
         : eventSymbol_{std::move(other.eventSymbol_)}, eventFlags_{other.eventFlags_},
@@ -80,27 +60,7 @@ struct Candle : virtual public Event, virtual public TimeSeries, virtual public 
           volume_{other.volume_}, vwap_{other.vwap_}, bidVolume_{other.bidVolume_}, askVolume_{other.askVolume_},
           impVolatility_{other.impVolatility_}, openInterest_{other.openInterest_} {}
 
-    Candle &operator=(Candle &&other) noexcept {
-        eventSymbol_ = std::move(other.eventSymbol_);
-        eventFlags_ = other.eventFlags_;
-        eventTime_ = other.eventTime_;
-        index_ = other.index_;
-        time_ = other.time_;
-        sequence_ = other.sequence_;
-        count_ = other.count_;
-        open_ = other.open_;
-        high_ = other.high_;
-        low_ = other.low_;
-        close_ = other.close_;
-        volume_ = other.volume_;
-        vwap_ = other.vwap_;
-        bidVolume_ = other.bidVolume_;
-        askVolume_ = other.askVolume_;
-        impVolatility_ = other.impVolatility_;
-        openInterest_ = other.openInterest_;
-
-        return *this;
-    }
+    Candle &operator=(Candle &&other) noexcept = delete;
 
     explicit Candle(std::string eventSymbol) : eventSymbol_{std::move(eventSymbol)} {}
 

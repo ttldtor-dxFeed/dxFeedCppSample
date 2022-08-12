@@ -8,7 +8,7 @@
 namespace dxfcpp {
 
 namespace LogDumper {
-#ifndef NDEBUG
+
 inline std::string getClassName(const std::string &prettyFunctionOutput, const std::string &thisParameterTypeName) {
     std::string clazz = prettyFunctionOutput;
 #    if defined(__clang__)
@@ -65,7 +65,7 @@ template <typename T> inline void dump(T &&v) {
 
     std::cerr << oss.str();
 }
-#endif
+
 } // namespace LogDumper
 
 } // namespace dxfcpp

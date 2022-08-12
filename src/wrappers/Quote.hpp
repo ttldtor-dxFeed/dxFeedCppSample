@@ -20,7 +20,7 @@ namespace dxfcpp {
  * represents the most recent information that is available about the best quote on the market at any given moment of
  * time.
  */
-struct Quote : virtual public MarketEvent, virtual public Lasting {
+struct Quote final : virtual public MarketEvent, virtual public Lasting {
     using Ptr = std::shared_ptr<Quote>;
 
   private:
@@ -62,24 +62,7 @@ struct Quote : virtual public MarketEvent, virtual public Lasting {
           bidSize_{other.bidSize_}, askTime_{other.askTime_}, askExchangeCode_{other.askExchangeCode_},
           askPrice_{other.askPrice_}, askSize_{other.askSize_}, scope_{other.scope_} {}
 
-    Quote &operator=(const Quote &other) {
-        setEventSymbol(other.getEventSymbol());
-        setEventTime(other.getEventTime());
-        time_ = other.time_;
-        sequence_ = other.sequence_;
-        timeNanoPart_ = other.timeNanoPart_;
-        bidTime_ = other.bidTime_;
-        bidExchangeCode_ = other.bidExchangeCode_;
-        bidPrice_ = other.bidPrice_;
-        bidSize_ = other.bidSize_;
-        askTime_ = other.askTime_;
-        askExchangeCode_ = other.askExchangeCode_;
-        askPrice_ = other.askPrice_;
-        askSize_ = other.askSize_;
-        scope_ = other.scope_;
-
-        return *this;
-    }
+    Quote &operator=(const Quote &other) = delete;
 
     Quote(Quote &&other) noexcept
         : MarketEvent(std::move(other)), time_{other.time_}, sequence_{other.sequence_},
@@ -88,23 +71,7 @@ struct Quote : virtual public MarketEvent, virtual public Lasting {
           askExchangeCode_{other.askExchangeCode_}, askPrice_{other.askPrice_}, askSize_{other.askSize_},
           scope_{std::move(other.scope_)} {}
 
-    Quote &operator=(Quote &&other) noexcept {
-        MarketEvent::operator=(std::move(other));
-        time_ = other.time_;
-        sequence_ = other.sequence_;
-        timeNanoPart_ = other.timeNanoPart_;
-        bidTime_ = other.bidTime_;
-        bidExchangeCode_ = other.bidExchangeCode_;
-        bidPrice_ = other.bidPrice_;
-        bidSize_ = other.bidSize_;
-        askTime_ = other.askTime_;
-        askExchangeCode_ = other.askExchangeCode_;
-        askPrice_ = other.askPrice_;
-        askSize_ = other.askSize_;
-        scope_ = std::move(other.scope_);
-
-        return *this;
-    }
+    Quote &operator=(Quote &&other) noexcept = delete;
 
     explicit Quote(std::string eventSymbol) : MarketEvent(std::move(eventSymbol)), scope_(OrderScope::UNKNOWN) {}
     void setEventSymbol(const std::string &eventSymbol) override { MarketEvent::setEventSymbol(eventSymbol); }
@@ -133,6 +100,7 @@ struct Quote : virtual public MarketEvent, virtual public Lasting {
 
     std::string toString() const override {
         return std::string("Quote") + "{" + getEventSymbol() + ", eventTime=" + DateTimeConverter::toISO(getEventTime()) +
+            ", time=" + DateTimeConverter::toISO(time_) +
             ", timeNanoPart=" + std::to_string(timeNanoPart_) + ", sequence=" + std::to_string(sequence_) +
             ", bidTime=" + DateTimeConverter::toISO(bidTime_) + ", bidExchange=" + bidExchangeCode_ +
             ", bidPrice=" + std::to_string(bidPrice_) + ", bidSize=" + std::to_string(bidSize_) +

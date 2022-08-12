@@ -9,19 +9,14 @@
 #include <unordered_set>
 #include <vector>
 
+#include "Candle.hpp"
 #include "DXFCppConfig.hpp"
-
 #include "EventTraits.hpp"
 #include "EventType.hpp"
-
+#include "Quote.hpp"
 #include "helpers/Handler.hpp"
 
-#include "Candle.hpp"
-#include "Quote.hpp"
-
 namespace dxfcpp {
-
-struct Connection;
 
 template <class T, class Compare> constexpr const T &clamp(const T &v, const T &lo, const T &hi, Compare comp) {
     return comp(v, lo) ? lo : comp(hi, v) ? hi : v;

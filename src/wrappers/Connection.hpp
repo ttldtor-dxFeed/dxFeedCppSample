@@ -136,6 +136,16 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     Subscription::Ptr createSubscription(std::initializer_list<EventType> eventTypes) {
         return createSubscription(eventTypes.begin(), eventTypes.end());
     }
+
+    template <typename E>
+    std::future<std::vector<typename E::Ptr>> getTimeSeriesFuture(const std::string &address, const std::string &symbol,
+                                                                  std::uint64_t fromTime, std::uint64_t toTime,
+                                                                  long timeout);
+
+    template <typename E>
+    std::future<std::vector<typename E::Ptr>>
+    getTimeSeriesFuture(const std::string &address, const std::string &symbol, std::chrono::milliseconds fromTime,
+                        std::chrono::milliseconds toTime, std::chrono::seconds timeout);
 };
 
 const Connection::Ptr Connection::INVALID{new Connection{}};
