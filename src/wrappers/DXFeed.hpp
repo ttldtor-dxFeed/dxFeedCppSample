@@ -16,7 +16,7 @@ template <typename OnDisconnectListener = typename Handler<void()>::ListenerType
           typename OnConnectionStatusChangedListener =
               typename Handler<void(ConnectionStatus, ConnectionStatus)>::ListenerType>
 inline Connection::Ptr connect(const std::string &address, OnDisconnectListener &&onDisconnectListener,
-                                           OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
+                               OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
     return Connection::create(address, std::forward<OnDisconnectListener>(onDisconnectListener),
                               std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener));
 }

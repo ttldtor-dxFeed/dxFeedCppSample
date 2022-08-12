@@ -2,6 +2,7 @@
 
 #include "DXFCppConfig.hpp"
 
+#include <numeric>
 #include <unordered_set>
 #include <utility>
 
@@ -33,9 +34,9 @@ class EventType {
 
     explicit EventType() : cApiEventId_{unsigned(-1)}, cApiEventMask_{unsigned(-1)} {}
 
-    DXFCPP_CONSTEXPR unsigned getCApiEventId() const { return cApiEventId_; }
+    unsigned getCApiEventId() const { return cApiEventId_; }
 
-    DXFCPP_CONSTEXPR unsigned getCApiEventMask() const { return cApiEventMask_; }
+    unsigned getCApiEventMask() const { return cApiEventMask_; }
 
     bool operator==(const EventType &eventType) const { return cApiEventId_ == eventType.cApiEventId_; }
 };
@@ -75,22 +76,12 @@ class EventTypesMask final {
     explicit EventTypesMask(unsigned mask) : mask_{mask} {}
 
     template <typename EventTypeIt> EventTypesMask(EventTypeIt begin, EventTypeIt end) {
-        std::unordered_set<EventType> eventTypes{};
-
-        for (auto it = begin; it != end; it++) {
-            eventTypes.insert(*it);
-        }
-
-        unsigned resultMask = 0u;
-
-        for (const auto &eventType : eventTypes) {
-            resultMask |= eventType.getCApiEventMask();
-        }
-
-        mask_ = resultMask;
+        mask_ = std::accumulate(begin, end, 0u,
+                                [](unsigned mask, const EventType &flag) { return mask | flag.getCApiEventMask(); });
     }
 
-    EventTypesMask(std::initializer_list<EventType> eventTypes) : EventTypesMask(eventTypes.begin(), eventTypes.end()) {}
+    explicit EventTypesMask(std::initializer_list<EventType> eventTypes)
+        : EventTypesMask(eventTypes.begin(), eventTypes.end()) {}
 
     DXFCPP_CONSTEXPR unsigned getMask() const { return mask_; }
 

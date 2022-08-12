@@ -11,14 +11,11 @@ extern "C" {
 
 namespace std {
 
-template<>
-struct hash<dxf_connection_status_t> {
-    std::size_t operator()(dxf_connection_status_t status) const noexcept {
-        return static_cast<std::size_t>(status);
-    }
+template <> struct hash<dxf_connection_status_t> {
+    std::size_t operator()(dxf_connection_status_t status) const noexcept { return static_cast<std::size_t>(status); }
 };
 
-}
+} // namespace std
 
 namespace dxfcpp {
 
@@ -29,8 +26,7 @@ class ConnectionStatus {
     dxf_connection_status_t status_;
     std::string string_;
 
-    ConnectionStatus(dxf_connection_status_t status, const std::string& string)
-        : status_{status}, string_{string} {}
+    ConnectionStatus(dxf_connection_status_t status, const std::string &string) : status_{status}, string_{string} {}
 
   public:
     static const ConnectionStatus NOT_CONNECTED;

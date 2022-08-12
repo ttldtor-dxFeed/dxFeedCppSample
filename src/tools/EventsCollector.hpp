@@ -29,7 +29,7 @@ class EventsCollector {
         std::atomic<bool> done_{false};
 
         std::mutex eventsMutex_{};
-        std::map<typename EventType::IndexType, EventType> events_{};
+        std::map<std::uint64_t, typename EventType::Ptr> events_{};
 
         std::mutex cvMutex_{};
         std::condition_variable cv_{};
@@ -64,22 +64,23 @@ class EventsCollector {
         void applyEventData(const dxf_event_data_t *eventData) {
             // We need a copy
             //  TODO: std::bit_cast C++20
-            auto event = EventType(symbol_, *reinterpret_cast<const typename EventTraits<EventType>::CApiEventType *>(eventData));
+            auto event = std::make_shared<EventType>(
+                symbol_, *reinterpret_cast<const typename EventTraits<EventType>::CApiEventType *>(eventData));
 
-            //std::cout << event.toString() << std::endl;
+            // std::cout << event.toString() << std::endl;
 
             std::lock_guard<std::mutex> guard(eventsMutex_);
 
-            if (event.getTime() >= fromTime_ && event.getTime() <= toTime_) {
-                bool remove = dxfcpp::EventFlags::REMOVE_EVENT.in(event.getEventFlags());
+            if (event->getTime() >= fromTime_ && event->getTime() <= toTime_) {
+                bool remove = dxfcpp::EventFlag::REMOVE_EVENT.in(event->getEventFlags());
 
-                event.setEventFlags(0u);
+                event->setEventFlags(dxfcpp::EventFlagsMask(0u));
 
-                auto found = events_.find(event.getIndex());
+                auto found = events_.find(event->getIndex());
 
                 if (found == events_.end()) {
                     if (!remove) {
-                        events_.emplace(event.getIndex(), event);
+                        events_.emplace(event->getIndex(), event);
                     }
                 } else if (remove) {
                     events_.erase(found);
@@ -88,19 +89,19 @@ class EventsCollector {
                 }
             }
 
-            if (event.getTime() <= fromTime_ || dxfcpp::EventFlags::SNAPSHOT_SNIP.in(event.getEventFlags())) {
+            if (event->getTime() <= fromTime_ || EventFlag::SNAPSHOT_SNIP.in(event->getEventFlags())) {
                 done();
             }
         }
 
-        std::vector<EventType> getResult() {
+        std::vector<typename EventType::Ptr> getResult() {
             std::lock_guard<std::mutex> guard(eventsMutex_);
 
-            std::vector<EventType> result{};
+            std::vector<typename EventType::Ptr> result{};
 
             // reverse
             std::transform(events_.rbegin(), events_.rend(), std::back_inserter(result),
-                           [](const std::pair<typename EventType::IndexType, EventType> &pair) { return pair.second; });
+                           [](const std::pair<std::uint64_t, typename EventType::Ptr> &pair) { return pair.second; });
 
             return result;
         }
@@ -115,12 +116,12 @@ class EventsCollector {
     }
 
     template <typename EventType>
-    std::future<std::vector<EventType>> collectTimeSeriesSnapshot(const std::string &address, const std::string &symbol,
+    std::future<std::vector<typename EventType::Ptr>> collectTimeSeriesSnapshot(const std::string &address, const std::string &symbol,
                                                                   long long fromTime, long long toTime, long timeout) {
         return std::async(
             std::launch::async,
             [](const std::string &address, const std::string &symbol, long long fromTime, long long toTime,
-               long timeout) -> std::vector<EventType> {
+               long timeout) -> std::vector<typename EventType::Ptr> {
                 TimeSeriesSnapshotHolder<EventType> holder{symbol, fromTime, toTime};
 
                 dxf_connection_t con = nullptr;

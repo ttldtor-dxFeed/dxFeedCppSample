@@ -14,8 +14,6 @@
 #include "EventTraits.hpp"
 #include "EventType.hpp"
 
-#include <variant.hpp>
-
 #include "helpers/Handler.hpp"
 
 #include "Candle.hpp"
@@ -56,11 +54,7 @@ class Symbols {
 };
 
 struct Subscription final {
-    using Event = nonstd::variant<Quote::Ptr, Candle::Ptr>;
-    using TimeSeriesEvent = nonstd::variant<Candle::Ptr>;
-    using IndexedEvent = nonstd::variant<Candle::Ptr>;
-
-    template <typename E> class Impl {
+    class Impl {
         mutable std::recursive_mutex mutex_{};
         dxf_subscription_t subscriptionHandle_ = nullptr;
         std::function<void(int /* eventType */, dxf_const_string_t /* symbolName */,
@@ -68,7 +62,7 @@ struct Subscription final {
                            void * /* userData */)>
             eventListener_{};
 
-        Handler<void(Event)> onEvent_{};
+        Handler<void(Event::Ptr)> onEvent_{};
 
         friend Subscription;
 
@@ -92,7 +86,7 @@ struct Subscription final {
 
         ~Impl() { Close(); }
 
-        Handler<void(Event)> &onEvent() { return onEvent_; }
+        Handler<void(Event::Ptr)> &onEvent() { return onEvent_; }
 
         void addSymbol(const std::string &symbol) {
             safeCall([&symbol](dxf_subscription_t sub) {
@@ -166,12 +160,12 @@ struct Subscription final {
         }
     };
 
-    using Ptr = std::shared_ptr<Impl<Event>>;
+    using Ptr = std::shared_ptr<Impl>;
 
     static const Ptr INVALID;
 
     static Ptr create(dxf_connection_t connectionHandle, const EventTypesMask &eventTypesMask) {
-        auto s = std::make_shared<Impl<Event>>();
+        auto s = std::make_shared<Impl>();
         dxf_subscription_t subscriptionHandle = nullptr;
 
         auto r =
@@ -190,22 +184,14 @@ struct Subscription final {
                 auto cApiQuote = *reinterpret_cast<const dxf_quote_t *>(eventData);
                 auto quote = std::make_shared<Quote>(symbol, cApiQuote);
 
-                if (!quote) {
-                    std::cerr << "eventListener: Quote(NULL)\n";
-                }
-
-                reinterpret_cast<Impl<Event> *>(userData)->onEvent_(quote);
+                reinterpret_cast<Impl *>(userData)->onEvent_(quote);
             } break;
 
             case DXF_ET_CANDLE: {
                 auto cApiCandle = *reinterpret_cast<const dxf_candle_t *>(eventData);
                 auto candle = std::make_shared<Candle>(symbol, cApiCandle);
 
-                if (!candle) {
-                    std::cerr << "eventListener: Candle(NULL)\n";
-                }
-                
-                reinterpret_cast<Impl<Event> *>(userData)->onEvent_(candle);
+                reinterpret_cast<Impl *>(userData)->onEvent_(candle);
             } break;
             }
 
@@ -227,6 +213,6 @@ struct Subscription final {
     }
 };
 
-const Subscription::Ptr Subscription::INVALID{new Subscription::Impl<Event>{}};
+const Subscription::Ptr Subscription::INVALID{new Subscription::Impl{}};
 
 } // namespace dxfcpp

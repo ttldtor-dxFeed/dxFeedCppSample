@@ -2,46 +2,31 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "converters/DateTimeConverter.hpp"
 #include "tools/EventsCollector.hpp"
-#include "tools/EventsDumper.hpp"
 #include "wrappers/Candle.hpp"
 #include "wrappers/DXFeed.hpp"
 #include "wrappers/Quote.hpp"
 
+#include "processors/AbstractEventCheckingProcessor.hpp"
+#include "processors/CompositeProcessor.hpp"
 #include "wrappers/Connection.hpp"
 #include "wrappers/EventTraits.hpp"
 #include "wrappers/Subscription.hpp"
 
-struct CountingVisitor {
-    mutable std::atomic<unsigned long> counter{};
+struct QuoteProcessor : dxfcpp::AbstractEventCheckingProcessor<dxfcpp::Quote> {
+    explicit QuoteProcessor() noexcept = default;
 
-    void operator()(dxfcpp::Quote::Ptr q) const {
-        if (!q) {
-            std::cout << "Quote(NULL)\n";
+    void process(dxfcpp::Quote::Ptr e) override { std::cout << e->toString() + "\n"; }
 
-            return;
-        }
-
-        counter++;
-        std::cout << std::to_string(counter) + "): " + q->toString() + "\n";
-    }
-
-    void operator()(dxfcpp::Candle::Ptr c) const {
-        if (!c) {
-            std::cout << "Candle(NULL)\n";
-
-            return;
-        }
-
-        counter++;
-    }
+    static AbstractEventProcessor::Ptr create() { return std::make_shared<QuoteProcessor>(); }
 };
 
 void testQuoteSubscription(const std::string &address, std::initializer_list<std::string> symbols) {
-    CountingVisitor v{};
+    dxfcpp::CompositeProcessor processor({QuoteProcessor::create()});
 
     for (const auto &s : symbols) {
         std::cout << s << " ";
@@ -51,19 +36,22 @@ void testQuoteSubscription(const std::string &address, std::initializer_list<std
 
     auto c = dxfcpp::DXFeed::connect(
         address, []() { std::cout << "Disconnected" << std::endl; },
-        [](dxfcpp::ConnectionStatus oldStatus, dxfcpp::ConnectionStatus newStatus) {
+        [](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
             std::cout << "Status: " << oldStatus << " -> " << newStatus << std::endl;
         });
 
     auto s = c->createSubscription({dxfcpp::EventType::QUOTE});
 
-    s->onEvent() += [&v](dxfcpp::Subscription::Event event) -> void { nonstd::visit(v, event); };
+    s->onEvent() += [&processor](dxfcpp::Event::Ptr event) -> void { processor.process(std::move(event)); };
+    s->onEvent() += [&processor](dxfcpp::Event::Ptr event) -> void { processor.process(std::move(event)); };
+    s->onEvent() += [&processor](dxfcpp::Event::Ptr event) -> void { processor.process(std::move(event)); };
+    //    s->onEvent() += [&processor3](dxfcpp::Event::Ptr event) -> void { processor3(std::move(event)); };
     s->addSymbols(symbols);
 
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(15));
 }
 
-std::future<std::vector<dxfcpp::Candle>> testCandleSnapshot(const std::string &address, const std::string &candleSymbol,
+std::future<std::vector<dxfcpp::Candle::Ptr>> testCandleSnapshot(const std::string &address, const std::string &candleSymbol,
                                                             long long fromTime, long long toTime, long timeout) {
     auto collector = dxfcpp::EventsCollector{};
 
@@ -71,12 +59,6 @@ std::future<std::vector<dxfcpp::Candle>> testCandleSnapshot(const std::string &a
 }
 
 int main() {
-    auto f = std::async([]{
-       std::cout << "Start\n";
-       std::this_thread::sleep_for(std::chrono::seconds(10));
-       std::cout << "End\n";
-    });
-
     auto fromTimeString = "2022-08-04T00:00:00Z";
     auto toTimeString = "2022-08-05T00:00:00Z";
     auto fromTime = dxfcpp::DateTimeConverter::parseISO(fromTimeString);
@@ -87,7 +69,7 @@ int main() {
     std::cout << "AAPL&Q{=1m} (" << fromTimeString << " - " << toTimeString << ") CANDLE SNAPSHOT RESULT:" << std::endl;
 
     for (auto const &e : result) {
-        std::cout << e.toString() << std::endl;
+        std::cout << e->toString() << std::endl;
     }
 
     testQuoteSubscription("demo.dxfeed.com:7300", {"AAPL", "IBM"});

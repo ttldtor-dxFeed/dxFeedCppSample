@@ -1,7 +1,7 @@
 #pragma once
 
-#include "wrappers/DXFCppConfig.hpp"
 #include "date/date.h"
+#include "wrappers/DXFCppConfig.hpp"
 #include <chrono>
 #include <sstream>
 #include <string>
@@ -25,6 +25,10 @@ inline long long parseISO(const std::string &s) {
 }
 
 inline std::string toISO(long long timestamp) {
+    return date::format("%FT%TZ", date::sys_time<std::chrono::milliseconds>{std::chrono::milliseconds{timestamp}});
+}
+
+inline std::string toISO(std::uint64_t timestamp) {
     return date::format("%FT%TZ", date::sys_time<std::chrono::milliseconds>{std::chrono::milliseconds{timestamp}});
 }
 

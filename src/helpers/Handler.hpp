@@ -27,27 +27,16 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
     std::size_t mainFuturesSize_{};
 
     std::shared_future<void> handleImpl(ArgTypes &&...args) {
-        return std::async(std::launch::async, [this, &args...] {
-#ifndef NDEBUG
-            dump("handleImpl::async::begin", this);
-#endif
-            std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
-            std::vector<std::future<void>> futures{};
+        return std::async(
+            std::launch::async,
+            [this](ArgTypes &&...args) {
+                std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
-            futures.reserve(listeners_.size());
-
-            for (auto &listener : listeners_) {
-                futures.emplace_back(std::async(std::launch::async, listener.second, std::forward<ArgTypes>(args)...));
-            }
-
-            for (auto &f : futures) {
-                f.wait();
-            }
-#ifndef NDEBUG
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            dump("handleImpl::async::end", this);
-#endif
-        });
+                for (auto &listener : listeners_) {
+                    listener.second(args...);
+                }
+            },
+            std::forward<ArgTypes>(args)...);
     }
 
   public:
@@ -56,37 +45,7 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
         mainFutures_.reserve(mainFuturesSize);
     }
 
-#ifndef NDEBUG
-    template <typename T, typename This> static void dump(T &&v, This&&) {
-        std::ostringstream oss{};
-
-        std::string pf = __PRETTY_FUNCTION__;
-
-        std::string::size_type found = pf.find("This = ");
-        std::string clazz{};
-        if (found != std::string::npos) {
-            std::string::size_type found2 = pf.find("*;", found + 7);
-
-            if (found2 != std::string::npos) {
-                clazz = pf.substr(found + 7, found2 - (found + 7));
-            }
-        }
-
-        oss << "[" << clazz << "][" << std::this_thread::get_id() << "] (" << v << "): "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                   std::chrono::system_clock::now().time_since_epoch())
-                   .count()
-            << "\n";
-
-        std::cout << oss.str();
-    }
-#endif
-
     void handle(ArgTypes &&...args) {
-#ifndef NDEBUG
-        dump("handle::begin", this);
-#endif
-
         auto f = handleImpl(std::forward<ArgTypes>(args)...);
 
         {
@@ -101,11 +60,6 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
                 mainFuturesCurrentIndex_++;
             }
         }
-
-#ifndef NDEBUG
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        dump("handle::end", this);
-#endif
     }
 
     void operator()(ArgTypes &&...args) { return handle(std::forward<ArgTypes>(args)...); }

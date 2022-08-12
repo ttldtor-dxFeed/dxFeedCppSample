@@ -3,8 +3,8 @@
 #include "wrappers/DXFCppConfig.hpp"
 
 #ifdef _MSC_FULL_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
+#    pragma warning(push)
+#    pragma warning(disable : 4244)
 #endif
 
 #include <codecvt>
@@ -76,5 +76,5 @@ std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> StringConverter::wstringC
 } // namespace dxfcpp
 
 #ifdef _MSC_FULL_VER
-#pragma warning(pop)
+#    pragma warning(pop)
 #endif

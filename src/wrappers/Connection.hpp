@@ -26,7 +26,6 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     static const Ptr INVALID;
 
   private:
-
     mutable std::recursive_mutex mutex_{};
     dxf_connection_t connectionHandle_ = nullptr;
 
@@ -62,7 +61,6 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
   public:
-
     Connection &operator=(Connection &) = delete;
 
     void Close() {
@@ -103,13 +101,12 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
               typename OnConnectionStatusChangedListener =
                   typename Handler<void(const ConnectionStatus &, const ConnectionStatus &)>::ListenerType>
     static Ptr create(const std::string &address, OnDisconnectListener &&onDisconnectListener,
-                                              OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
-        return createImpl(address,
-                          [&onDisconnectListener, &onConnectionStatusChangedListener](Ptr &c) {
-                              c->onDisconnect() += std::forward<OnDisconnectListener>(onDisconnectListener);
-                              c->onConnectionStatusChanged() +=
-                                  std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener);
-                          });
+                      OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
+        return createImpl(address, [&onDisconnectListener, &onConnectionStatusChangedListener](Ptr &c) {
+            c->onDisconnect() += std::forward<OnDisconnectListener>(onDisconnectListener);
+            c->onConnectionStatusChanged() +=
+                std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener);
+        });
     }
 
     static Ptr create(const std::string &address) {
