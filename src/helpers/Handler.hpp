@@ -52,7 +52,7 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
             std::lock_guard<std::recursive_mutex> guard{mainFuturesMutex_};
 
             if (mainFutures_.size() < mainFuturesSize_) {
-                mainFutures_.template emplace_back(f);
+                mainFutures_.emplace_back(f);
             } else {
                 mainFuturesCurrentIndex_ = mainFuturesCurrentIndex_ % mainFuturesSize_;
                 mainFutures_[mainFuturesCurrentIndex_].wait();
