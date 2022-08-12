@@ -14,17 +14,28 @@
 #include "ConnectionStatus.hpp"
 #include "helpers/Handler.hpp"
 
+#include "Subscription.hpp"
+
 namespace dxfcpp {
 
-class Connection final : public std::enable_shared_from_this<Connection> {
+struct Subscription;
+
+struct Connection final : public std::enable_shared_from_this<Connection> {
+    using Ptr = std::shared_ptr<Connection>;
+
+    static const Ptr INVALID;
+
+  private:
     mutable std::recursive_mutex mutex_{};
     dxf_connection_t connectionHandle_ = nullptr;
 
     Handler<void()> onDisconnect_{};
-    Handler<void(const ConnectionStatus &, const ConnectionStatus &)> onConnectionStatusChanged_{};
+    Handler<void(ConnectionStatus, ConnectionStatus)> onConnectionStatusChanged_{};
 
-    template <typename F = std::function<void(std::shared_ptr<Connection> &)>>
-    static std::shared_ptr<Connection> createImpl(const std::string &address, F &&beforeConnect) {
+    std::vector<Subscription::Ptr> subscriptions_{};
+
+    template <typename F = std::function<void(Ptr &)>>
+    static Ptr createImpl(const std::string &address, F &&beforeConnect) {
         auto c = std::make_shared<Connection>();
 
         beforeConnect(c);
@@ -40,7 +51,7 @@ class Connection final : public std::enable_shared_from_this<Connection> {
             nullptr, nullptr, reinterpret_cast<void *>(c.get()), &connectionHandle);
 
         if (r == DXF_FAILURE) {
-            return {};
+            return INVALID;
         }
 
         c->connectionHandle_ = connectionHandle;
@@ -52,14 +63,20 @@ class Connection final : public std::enable_shared_from_this<Connection> {
   public:
     Connection &operator=(Connection &) = delete;
 
-    ~Connection() {
+    void Close() {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
 
         if (connectionHandle_ != nullptr) {
+            for (const auto &sub : subscriptions_) {
+                sub->Close();
+            }
+
             dxf_close_connection(connectionHandle_);
             connectionHandle_ = nullptr;
         }
     }
+
+    ~Connection() { Close(); }
 
     ConnectionStatus getConnectionStatus() const {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
@@ -76,43 +93,51 @@ class Connection final : public std::enable_shared_from_this<Connection> {
 
     Handler<void()> &onDisconnect() { return onDisconnect_; }
 
-    Handler<void(const ConnectionStatus &, const ConnectionStatus &)> &onConnectionStatusChanged() {
+    Handler<void(ConnectionStatus, ConnectionStatus)> &onConnectionStatusChanged() {
         return onConnectionStatusChanged_;
     }
 
     template <typename OnDisconnectListener = typename Handler<void()>::ListenerType,
               typename OnConnectionStatusChangedListener =
                   typename Handler<void(const ConnectionStatus &, const ConnectionStatus &)>::ListenerType>
-    static std::shared_ptr<Connection> create(const std::string &address, OnDisconnectListener &&onDisconnectListener,
-                                              OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
-        return createImpl(address,
-                          [&onDisconnectListener, &onConnectionStatusChangedListener](std::shared_ptr<Connection> &c) {
-                              c->onDisconnect() += std::forward<OnDisconnectListener>(onDisconnectListener);
-                              c->onConnectionStatusChanged() +=
-                                  std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener);
-                          });
+    static Ptr create(const std::string &address, OnDisconnectListener &&onDisconnectListener,
+                      OnConnectionStatusChangedListener &&onConnectionStatusChangedListener) {
+        return createImpl(address, [&onDisconnectListener, &onConnectionStatusChangedListener](Ptr &c) {
+            c->onDisconnect() += std::forward<OnDisconnectListener>(onDisconnectListener);
+            c->onConnectionStatusChanged() +=
+                std::forward<OnConnectionStatusChangedListener>(onConnectionStatusChangedListener);
+        });
     }
 
-    static std::shared_ptr<Connection> create(const std::string &address) {
-        return createImpl(address, [](std::shared_ptr<Connection> &) {});
+    static Ptr create(const std::string &address) {
+        return createImpl(address, [](Ptr &) {});
+    }
+
+    Subscription::Ptr createSubscription(const EventTypesMask &eventTypesMask) {
+        std::lock_guard<std::recursive_mutex> lock{mutex_};
+
+        if (connectionHandle_ == nullptr) {
+            return Subscription::INVALID;
+        }
+
+        auto sub = Subscription::create(connectionHandle_, eventTypesMask);
+
+        if (sub) {
+            subscriptions_.push_back(sub);
+        }
+
+        return sub;
+    }
+
+    template <typename EventTypeIt> Subscription::Ptr createSubscription(EventTypeIt begin, EventTypeIt end) {
+        return createSubscription(EventTypesMask(begin, end));
+    }
+
+    Subscription::Ptr createSubscription(std::initializer_list<EventType> eventTypes) {
+        return createSubscription(eventTypes.begin(), eventTypes.end());
     }
 };
+
+const Connection::Ptr Connection::INVALID{new Connection{}};
 
 } // namespace dxfcpp
-
-/*
-{
-    auto c = dxfcpp::DXFeed::connect(
-        "demo.dxfeed.com:7300", []() { std::cout << "Disconnected" << std::endl; },
-        [](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
-            std::cout << "Status: " << oldStatus << " -> " << newStatus << std::endl;
-        });
-
-c->onConnectionStatusChanged() +=
-[](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
-    std::cout << "Status 2: " << oldStatus << " -> " << newStatus << std::endl;
-};
-
-std::this_thread::sleep_for(std::chrono::seconds(5));
-}
- */

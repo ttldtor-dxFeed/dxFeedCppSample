@@ -5,7 +5,7 @@ cmake_policy(SET CMP0015 NEW)
 project(dxFeedCppSample)
 set(CMAKE_CXX_STANDARD 11)
 
-add_definitions(-DFMT_HEADER_ONLY=1)
+#add_definitions(-DFMT_HEADER_ONLY=1)
 
 set(dxFeedCppSample_wrappers
         src/wrappers/EventFlags.hpp
@@ -18,18 +18,25 @@ set(dxFeedCppSample_wrappers
         src/wrappers/Subscription.hpp
         src/wrappers/EventTraits.hpp
         src/wrappers/DXFCppConfig.hpp
-        src/wrappers/EventType.hpp)
-set(dxFeedCppSample_tools src/tools/EventsCollector.hpp src/tools/EventsDumper.hpp)
-set(dxFeedCppSample_helpers src/tools/EventsCollector.hpp src/helpers/Handler.hpp)
+        src/wrappers/EventType.hpp src/wrappers/Event.hpp src/wrappers/EventSource.hpp)
+set(dxFeedCppSample_tools src/tools/EventsCollector.hpp)
+set(dxFeedCppSample_helpers src/tools/EventsCollector.hpp src/helpers/Handler.hpp src/helpers/LogDumper.hpp src/helpers/IdGenerator.hpp)
 set(dxFeedCppSample_converters src/converters/StringConverter.hpp
         src/converters/DateTimeConverter.hpp)
+set(dxFeedCppSample_processors src/processors/AbstractEventProcessor.hpp src/processors/CompositeProcessor.hpp src/processors/AbstractEventCheckingProcessor.hpp)
 
 add_executable(dxFeedCppSample src/main.cpp ${dxFeedCppSample_converters} ${dxFeedCppSample_tools}
-        ${dxFeedCppSample_helpers} ${dxFeedCppSample_wrappers})
-target_include_directories(dxFeedCppSample PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
+        ${dxFeedCppSample_helpers} ${dxFeedCppSample_wrappers} ${dxFeedCppSample_processors})
+
+add_subdirectory(thirdparty/date-3.0.1)
+
+target_include_directories(dxFeedCppSample PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+
 target_link_directories(dxFeedCppSample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/lib)
 target_link_libraries(dxFeedCppSample PRIVATE debug DXFeedd_64 optimized DXFeed_64)
+target_link_libraries(dxFeedCppSample PRIVATE date::date)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
@@ -69,11 +76,3 @@ else ()
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeedd_64.so)
     target_link_libraries(dxFeedCppSample PRIVATE pthread)
 endif ()
-
-include(FetchContent)
-FetchContent_Declare(date_src
-        GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-        GIT_TAG v3.0.1  # adjust tag/branch/commit as needed
-        )
-FetchContent_MakeAvailable(date_src)
-target_link_libraries(dxFeedCppSample PRIVATE date::date)
