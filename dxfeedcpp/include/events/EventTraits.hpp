@@ -78,7 +78,7 @@ template <typename T> struct EventTraits<const volatile T> : public EventTraits<
 
 struct Quote;
 struct Candle;
-//TODO: add events
+// TODO: add events
 
 template <> struct EventTraits<Quote> : public EventTraitsBase {
     using Type = Quote;

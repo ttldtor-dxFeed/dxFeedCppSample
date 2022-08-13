@@ -284,7 +284,7 @@ class SubscriptionImpl {
             } break;
             }
 
-            //TODO: add events
+            // TODO: add events
             return;
         };
     }

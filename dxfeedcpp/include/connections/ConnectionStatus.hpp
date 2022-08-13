@@ -32,7 +32,8 @@ class ConnectionStatus {
     dxf_connection_status_t status_;
     std::string string_;
 
-    ConnectionStatus(dxf_connection_status_t status, std::string string) : status_{status}, string_{std::move(string)} {}
+    ConnectionStatus(dxf_connection_status_t status, std::string string)
+        : status_{status}, string_{std::move(string)} {}
 
   public:
     ///
