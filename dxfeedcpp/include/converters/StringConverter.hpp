@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DXFEED_HPP_INCLUDED
-#error Please include only the DXFeed.hpp header
+#    error Please include only the DXFeed.hpp header
 #endif
 
 #include "common/DXFCppConfig.hpp"
@@ -15,9 +15,15 @@
 
 namespace dxfcpp {
 
+///
 struct StringConverter {
     static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> wstringConvert;
 
+    /**
+     *
+     * @param utf8
+     * @return
+     */
     static std::wstring utf8ToWString(const std::string &utf8) noexcept {
         try {
             return wstringConvert.from_bytes(utf8);
@@ -26,6 +32,11 @@ struct StringConverter {
         }
     }
 
+    /**
+     *
+     * @param utf8
+     * @return
+     */
     static std::wstring utf8ToWString(const char *utf8) noexcept {
         if (utf8 == nullptr) {
             return {};
@@ -38,6 +49,11 @@ struct StringConverter {
         }
     }
 
+    /**
+     *
+     * @param c
+     * @return
+     */
     static wchar_t utf8ToWChar(char c) noexcept {
         if (c == '\0') {
             return L'\0';
@@ -46,6 +62,11 @@ struct StringConverter {
         return utf8ToWString(std::string(1, c))[0];
     }
 
+    /**
+     *
+     * @param utf16
+     * @return
+     */
     static std::string wStringToUtf8(const std::wstring &utf16) noexcept {
         try {
             return wstringConvert.to_bytes(utf16);
@@ -54,6 +75,11 @@ struct StringConverter {
         }
     }
 
+    /**
+     *
+     * @param utf16
+     * @return
+     */
     static std::string wStringToUtf8(const wchar_t *utf16) noexcept {
         if (utf16 == nullptr) {
             return {};
@@ -66,6 +92,11 @@ struct StringConverter {
         }
     }
 
+    /**
+     *
+     * @param c
+     * @return
+     */
     static char wCharToUtf8(wchar_t c) noexcept {
         if (c == L'\0') {
             return '\0';

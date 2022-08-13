@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DXFEED_HPP_INCLUDED
-#error Please include only the DXFeed.hpp header
+#    error Please include only the DXFeed.hpp header
 #endif
 
 #include <memory>
@@ -25,11 +25,14 @@ extern "C" {
 
 namespace dxfcpp {
 
-struct Subscription;
-
+/**
+ * TODO:
+ */
 struct Connection final : public std::enable_shared_from_this<Connection> {
+    ///
     using Ptr = std::shared_ptr<Connection>;
 
+    ///
     static const Ptr INVALID;
 
   private:
@@ -38,8 +41,10 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
 
     Handler<void()> onDisconnect_{};
     Handler<void(ConnectionStatus, ConnectionStatus)> onConnectionStatusChanged_{};
+    Handler<void()> onClose_{};
 
     std::vector<Subscription::Ptr> subscriptions_{};
+    std::vector<TimeSeriesSubscription::Ptr> timeSeriesSubscriptions_{};
 
     template <typename F = std::function<void(Ptr &)>>
     static Ptr createImpl(const std::string &address, F &&beforeConnect) {
@@ -67,15 +72,18 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
         return c;
     }
 
-  public:
-    Connection &operator=(Connection &) = delete;
+    void close() {
+        onClose_();
 
-    void Close() {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
 
         if (connectionHandle_ != nullptr) {
             for (const auto &sub : subscriptions_) {
-                sub->Close();
+                sub->close();
+            }
+
+            for (const auto &sub : timeSeriesSubscriptions_) {
+                sub->close();
             }
 
             dxf_close_connection(connectionHandle_);
@@ -83,8 +91,12 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
         }
     }
 
-    ~Connection() { Close(); }
+  public:
+    Connection &operator=(Connection &) = delete;
 
+    ~Connection() { close(); }
+
+    ///
     ConnectionStatus getConnectionStatus() const {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
 
@@ -98,12 +110,25 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
         return ConnectionStatus::NOT_CONNECTED;
     }
 
+    ///
     Handler<void()> &onDisconnect() { return onDisconnect_; }
 
     Handler<void(ConnectionStatus, ConnectionStatus)> &onConnectionStatusChanged() {
         return onConnectionStatusChanged_;
     }
 
+    ///
+    Handler<void()> &onClose() { return onClose_; }
+
+    /**
+     *
+     * @tparam OnDisconnectListener
+     * @tparam OnConnectionStatusChangedListener
+     * @param address
+     * @param onDisconnectListener
+     * @param onConnectionStatusChangedListener
+     * @return
+     */
     template <typename OnDisconnectListener = typename Handler<void()>::ListenerType,
               typename OnConnectionStatusChangedListener =
                   typename Handler<void(const ConnectionStatus &, const ConnectionStatus &)>::ListenerType>
@@ -116,10 +141,20 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
         });
     }
 
+    /**
+     *
+     * @param address
+     * @return
+     */
     static Ptr create(const std::string &address) {
         return createImpl(address, [](Ptr &) {});
     }
 
+    /**
+     *
+     * @param eventTypesMask
+     * @return
+     */
     Subscription::Ptr createSubscription(const EventTypesMask &eventTypesMask) {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
 
@@ -136,25 +171,109 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
         return sub;
     }
 
+    /**
+     *
+     * @tparam EventTypeIt
+     * @param begin
+     * @param end
+     * @return
+     */
     template <typename EventTypeIt> Subscription::Ptr createSubscription(EventTypeIt begin, EventTypeIt end) {
         return createSubscription(EventTypesMask(begin, end));
     }
 
+    /**
+     *
+     * @param eventTypes
+     * @return
+     */
     Subscription::Ptr createSubscription(std::initializer_list<EventType> eventTypes) {
         return createSubscription(eventTypes.begin(), eventTypes.end());
     }
 
-    template <typename E>
-    std::future<std::vector<typename E::Ptr>> getTimeSeriesFuture(const std::string &address, const std::string &symbol,
-                                                                  std::uint64_t fromTime, std::uint64_t toTime,
-                                                                  long timeout);
+    /**
+     *
+     * @param eventTypesMask
+     * @param fromTime
+     * @return
+     */
+    TimeSeriesSubscription::Ptr createTimeSeriesSubscription(const EventTypesMask &eventTypesMask,
+                                                             std::uint64_t fromTime) {
+        std::lock_guard<std::recursive_mutex> lock{mutex_};
 
+        if (connectionHandle_ == nullptr) {
+            return TimeSeriesSubscription::INVALID;
+        }
+
+        auto sub = TimeSeriesSubscription::create(connectionHandle_, eventTypesMask, fromTime);
+
+        if (sub) {
+            timeSeriesSubscriptions_.push_back(sub);
+        }
+
+        return sub;
+    }
+
+    /**
+     *
+     * @tparam EventTypeIt
+     * @param begin
+     * @param end
+     * @param fromTime
+     * @return
+     */
+    template <typename EventTypeIt>
+    Subscription::Ptr createTimeSeriesSubscription(EventTypeIt begin, EventTypeIt end, std::uint64_t fromTime) {
+        return createTimeSeriesSubscription(EventTypesMask(begin, end), fromTime);
+    }
+
+    /**
+     *
+     * @param eventTypes
+     * @param fromTime
+     * @return
+     */
+    Subscription::Ptr createTimeSeriesSubscription(std::initializer_list<EventType> eventTypes,
+                                                   std::uint64_t fromTime) {
+        return createTimeSeriesSubscription(eventTypes.begin(), eventTypes.end(), fromTime);
+    }
+
+    /**
+     * Returns a Future with a vector of smart pointers to the TimeSeries instance of the object
+     * (for example, dxfcpp::Candle), or a Future with an empty vector if an error occurred.
+     *
+     * @tparam E TimeSeries class type, e.g. dxfcpp::Candle etc
+     * @param symbol
+     * @param fromTime
+     * @param toTime
+     * @param timeout
+     * @return a Future with a vector of smart pointers
+     */
+    template <typename E>
+    std::future<std::vector<typename E::Ptr>> getTimeSeriesFuture(const std::string &symbol, std::uint64_t fromTime,
+                                                                  std::uint64_t toTime, long timeout) {
+        return TimeSeriesSubscriptionFuture<E>::template create<Connection>(shared_from_this(), symbol, fromTime,
+                                                                            toTime, timeout);
+    }
+
+    /**
+     *
+     * @tparam E
+     * @param symbol
+     * @param fromTime
+     * @param toTime
+     * @param timeout
+     * @return
+     */
     template <typename E>
     std::future<std::vector<typename E::Ptr>>
-    getTimeSeriesFuture(const std::string &address, const std::string &symbol, std::chrono::milliseconds fromTime,
-                        std::chrono::milliseconds toTime, std::chrono::seconds timeout);
+    getTimeSeriesFuture(const std::string &symbol, std::chrono::milliseconds fromTime, std::chrono::milliseconds toTime,
+                        std::chrono::seconds timeout) {
+        return getTimeSeriesFuture<E>(symbol, fromTime.count(), toTime.count(), timeout.count());
+    }
 };
 
+///
 const Connection::Ptr Connection::INVALID{new Connection{}};
 
 } // namespace dxfcpp

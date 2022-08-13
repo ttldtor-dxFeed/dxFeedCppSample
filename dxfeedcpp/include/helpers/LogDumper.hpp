@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DXFEED_HPP_INCLUDED
-#error Please include only the DXFeed.hpp header
+#    error Please include only the DXFeed.hpp header
 #endif
 
 #include <iostream>
@@ -15,7 +15,7 @@ namespace LogDumper {
 
 inline std::string getClassName(const std::string &prettyFunctionOutput, const std::string &thisParameterTypeName) {
     std::string clazz = prettyFunctionOutput;
-#    if defined(__clang__)
+#if defined(__clang__)
     auto thisDef = thisParameterTypeName + " = ";
     std::string::size_type found = prettyFunctionOutput.find(thisDef);
     if (found != std::string::npos) {
@@ -25,7 +25,7 @@ inline std::string getClassName(const std::string &prettyFunctionOutput, const s
             clazz = prettyFunctionOutput.substr(found + thisDef.size(), found2 - (found + thisDef.size()));
         }
     }
-#    elif defined(__GNUC__) || defined(__GNUG__)
+#elif defined(__GNUC__) || defined(__GNUG__)
     auto thisDef = thisParameterTypeName + " = ";
     std::string::size_type found = prettyFunctionOutput.find(thisDef);
     if (found != std::string::npos) {
@@ -35,19 +35,19 @@ inline std::string getClassName(const std::string &prettyFunctionOutput, const s
             clazz = prettyFunctionOutput.substr(found + thisDef.size(), found2 - (found + thisDef.size()));
         }
     }
-#    elif defined(_MSC_VER)
-#    endif
+#elif defined(_MSC_VER)
+#endif
     return clazz;
 }
 
 template <typename T, typename This> inline void dump(T &&v, This &&) {
     std::ostringstream oss{};
 
-#    ifdef _MSC_VER
+#ifdef _MSC_VER
     std::string pf = __FUNCSIG__;
-#    else
+#else
     std::string pf = __PRETTY_FUNCTION__;
-#    endif
+#endif
 
     std::string clazz = getClassName(pf, "This");
 

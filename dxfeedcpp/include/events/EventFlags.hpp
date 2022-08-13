@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DXFEED_HPP_INCLUDED
-#error Please include only the DXFeed.hpp header
+#    error Please include only the DXFeed.hpp header
 #endif
 
 #include "common/DXFCppConfig.hpp"
@@ -18,33 +18,55 @@ class EventFlagsMask;
 /**
  * Wrapper over the dxf_event_flag enum
  */
-class EventFlag {
+class EventFlag final {
     unsigned flag_;
     std::string name_;
 
     EventFlag(unsigned flag, std::string name) : flag_{flag}, name_{std::move(name)} {}
 
   public:
+    ///
     static const EventFlag TX_PENDING;
+    ///
     static const EventFlag REMOVE_EVENT;
+    ///
     static const EventFlag SNAPSHOT_BEGIN;
+    ///
     static const EventFlag SNAPSHOT_END;
+    ///
     static const EventFlag SNAPSHOT_SNIP;
+    ///
     static const EventFlag SNAPSHOT_MODE;
+    ///
     static const EventFlag REMOVE_SYMBOL;
 
+    ///
     explicit EventFlag() : flag_{unsigned(-1)}, name_{"INVALID"} {}
 
+    ///
     unsigned getFlag() const { return flag_; }
 
+    /**
+     *
+     * @param eventFlagsMask
+     * @return
+     */
     bool in(unsigned eventFlagsMask) const { return (eventFlagsMask & flag_) != 0; }
 
+    /**
+     *
+     * @tparam EventFlagsMask
+     * @param eventFlagsMask
+     * @return
+     */
     template <typename EventFlagsMask> bool in(const EventFlagsMask &eventFlagsMask) const {
         return in(eventFlagsMask.getMask());
     }
 
+    ///
     const std::string &getName() const { return name_; }
 
+    ///
     std::string toString() const { return name_; }
 };
 
@@ -60,6 +82,7 @@ const EventFlag EventFlag::REMOVE_SYMBOL{0x80u, "REMOVE_SYMBOL"};
 } // namespace dxfcpp
 
 namespace std {
+///
 template <> struct hash<dxfcpp::EventFlag> {
     std::size_t operator()(const dxfcpp::EventFlag &eventFlag) const noexcept { return eventFlag.getFlag(); }
 };
@@ -67,32 +90,66 @@ template <> struct hash<dxfcpp::EventFlag> {
 
 namespace dxfcpp {
 
-class EventFlagsMask {
+///
+class EventFlagsMask final {
     unsigned mask_;
 
   public:
+    ///
     explicit EventFlagsMask() : mask_{0u} {}
+    /**
+     *
+     * @param mask
+     */
     explicit EventFlagsMask(unsigned mask) : mask_{mask} {}
+    /**
+     *
+     * @param mask
+     */
     explicit EventFlagsMask(dxf_event_flag_t mask) : mask_{static_cast<unsigned>(mask)} {}
 
+    /**
+     *
+     * @tparam EventFlagIt
+     * @param begin
+     * @param end
+     */
     template <typename EventFlagIt> EventFlagsMask(EventFlagIt begin, EventFlagIt end) {
         mask_ =
             std::accumulate(begin, end, 0u, [](unsigned mask, const EventFlag &flag) { return mask | flag.getFlag(); });
     }
 
-    explicit EventFlagsMask(std::initializer_list<EventFlag> eventTypes)
+    /**
+     *
+     * @param eventTypes
+     */
+    EventFlagsMask(std::initializer_list<EventFlag> eventTypes)
         : EventFlagsMask(eventTypes.begin(), eventTypes.end()) {}
 
+    ///
     DXFCPP_CONSTEXPR unsigned getMask() const { return mask_; }
 
+    /**
+     *
+     * @param eventTypesMask
+     * @param eventType
+     * @return
+     */
     friend EventFlagsMask operator|(const EventFlagsMask &eventTypesMask, const EventFlag &eventType) {
         return EventFlagsMask{eventTypesMask.mask_ | eventType.getFlag()};
     }
 
+    /**
+     *
+     * @param eventType1
+     * @param eventType2
+     * @return
+     */
     friend EventFlagsMask operator|(const EventFlag &eventType1, const EventFlag &eventType2) {
         return EventFlagsMask{eventType1.getFlag() | eventType2.getFlag()};
     }
 
+    ///
     std::string toString() const {
         bool addOrSign = false;
         std::ostringstream result{};

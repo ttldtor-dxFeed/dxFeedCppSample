@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DXFEED_HPP_INCLUDED
-#error Please include only the DXFeed.hpp header
+#    error Please include only the DXFeed.hpp header
 #endif
 
 #include "common/DXFCppConfig.hpp"
@@ -17,7 +17,12 @@ namespace dxfcpp {
 
 template <typename Signature> struct Handler;
 
-template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
+/**
+ *
+ * @tparam ArgTypes
+ */
+template <typename... ArgTypes> struct Handler<void(ArgTypes...)> final {
+    ///
     using ListenerType = std::function<void(ArgTypes...)>;
 
   private:
@@ -44,11 +49,19 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
     }
 
   public:
+    /**
+     *
+     * @param mainFuturesSize
+     */
     explicit Handler(std::size_t mainFuturesSize = 256)
         : mainFuturesCurrentIndex_{0ULL}, mainFuturesSize_{mainFuturesSize} {
         mainFutures_.reserve(mainFuturesSize);
     }
 
+    /**
+     *
+     * @param args
+     */
     void handle(ArgTypes &&...args) {
         auto f = handleImpl(std::forward<ArgTypes>(args)...);
 
@@ -66,8 +79,17 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
         }
     }
 
+    /**
+     *
+     * @param args
+     */
     void operator()(ArgTypes &&...args) { return handle(std::forward<ArgTypes>(args)...); }
 
+    /**
+     *
+     * @param listener
+     * @return
+     */
     std::size_t add(ListenerType &&listener) {
         std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
@@ -77,8 +99,17 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
         return lastId_;
     }
 
+    /**
+     *
+     * @param listener
+     * @return
+     */
     std::size_t operator+=(ListenerType &&listener) { return add(std::forward<ListenerType>(listener)); }
 
+    /**
+     *
+     * @param id
+     */
     void remove(std::size_t id) {
         std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
@@ -87,6 +118,10 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> {
         }
     }
 
+    /**
+     *
+     * @param id
+     */
     void operator-=(std::size_t id) { return remove(id); }
 };
 

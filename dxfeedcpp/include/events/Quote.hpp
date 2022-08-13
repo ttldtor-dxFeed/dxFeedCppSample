@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef DXFEED_HPP_INCLUDED
-#error Please include only the DXFeed.hpp header
+#    error Please include only the DXFeed.hpp header
 #endif
 
 extern "C" {
@@ -107,8 +107,8 @@ struct Quote final : virtual public MarketEvent, virtual public Lasting {
     const OrderScope &getScope() const { return scope_; }
 
     std::string toString() const override {
-        return std::string("Quote") + "{" + getEventSymbol() + ", eventTime=" + DateTimeConverter::toISO(getEventTime()) +
-            ", time=" + DateTimeConverter::toISO(time_) +
+        return std::string("Quote") + "{" + getEventSymbol() +
+            ", eventTime=" + DateTimeConverter::toISO(getEventTime()) + ", time=" + DateTimeConverter::toISO(time_) +
             ", timeNanoPart=" + std::to_string(timeNanoPart_) + ", sequence=" + std::to_string(sequence_) +
             ", bidTime=" + DateTimeConverter::toISO(bidTime_) + ", bidExchange=" + bidExchangeCode_ +
             ", bidPrice=" + std::to_string(bidPrice_) + ", bidSize=" + std::to_string(bidSize_) +
