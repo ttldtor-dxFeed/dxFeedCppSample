@@ -397,8 +397,6 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
 
         std::mutex eventsMutex_{};
         std::map<std::uint64_t, typename E::Ptr> events_{};
-
-        std::mutex cvMutex_{};
         std::condition_variable cv_{};
 
         std::uint64_t fromTime_;
@@ -418,7 +416,7 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
          * @param timeout
          */
         void wait(long long timeout) {
-            std::unique_lock<std::mutex> lk(cvMutex_);
+            std::unique_lock<std::mutex> lk(eventsMutex_);
             if (timeout == 0) {
                 cv_.wait(lk, [this] { return done_.load(); });
             } else {
@@ -451,7 +449,7 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
 
             typename E::Ptr copy = std::make_shared<E>(*event);
 
-            std::lock_guard<std::mutex> guard(eventsMutex_);
+            std::unique_lock<std::mutex> lk(eventsMutex_);
 
             if (copy->getTime() >= fromTime_ && copy->getTime() <= toTime_) {
                 bool remove = dxfcpp::EventFlag::REMOVE_EVENT.in(copy->getEventFlags());
@@ -473,7 +471,9 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
             }
 
             if (copy->getTime() <= fromTime_ || EventFlag::SNAPSHOT_SNIP.in(copy->getEventFlags())) {
+                lk.unlock();
                 done();
+                lk.lock();
             }
         }
 
