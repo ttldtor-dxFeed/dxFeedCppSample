@@ -1,0 +1,2 @@
+add_library(dxfeedcppprocessors INTERFACE)
+add_library(dxfeedcpp::processors ALIAS dxfeedcppprocessors)

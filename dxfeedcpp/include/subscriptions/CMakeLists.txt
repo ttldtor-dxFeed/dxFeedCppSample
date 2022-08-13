@@ -1,0 +1,2 @@
+add_library(dxfeedcppsubscriptions INTERFACE)
+add_library(dxfeedcpp::subscriptions ALIAS dxfeedcppsubscriptions)

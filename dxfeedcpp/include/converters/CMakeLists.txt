@@ -1,0 +1,2 @@
+add_library(dxfeedcppconverters INTERFACE)
+add_library(dxfeedcpp::converters ALIAS dxfeedcppconverters)

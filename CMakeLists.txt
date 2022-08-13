@@ -6,29 +6,10 @@ project(dxFeedCppSample)
 set(CMAKE_CXX_STANDARD 11)
 
 #add_definitions(-DFMT_HEADER_ONLY=1)
-
-set(dxFeedCppSample_wrappers
-        src/wrappers/EventFlags.hpp
-        src/wrappers/Candle.hpp
-        src/wrappers/Quote.hpp
-        src/wrappers/OrderScope.hpp
-        src/wrappers/DXFeed.hpp
-        src/wrappers/Connection.hpp
-        src/wrappers/ConnectionStatus.hpp
-        src/wrappers/Subscription.hpp
-        src/wrappers/EventTraits.hpp
-        src/wrappers/DXFCppConfig.hpp
-        src/wrappers/EventType.hpp src/wrappers/Event.hpp src/wrappers/EventSource.hpp)
-set(dxFeedCppSample_tools src/tools/EventsCollector.hpp)
-set(dxFeedCppSample_helpers src/tools/EventsCollector.hpp src/helpers/Handler.hpp src/helpers/LogDumper.hpp src/helpers/IdGenerator.hpp)
-set(dxFeedCppSample_converters src/converters/StringConverter.hpp
-        src/converters/DateTimeConverter.hpp)
-set(dxFeedCppSample_processors src/processors/AbstractEventProcessor.hpp src/processors/CompositeProcessor.hpp src/processors/AbstractEventCheckingProcessor.hpp)
-
-add_executable(dxFeedCppSample src/main.cpp ${dxFeedCppSample_converters} ${dxFeedCppSample_tools}
-        ${dxFeedCppSample_helpers} ${dxFeedCppSample_wrappers} ${dxFeedCppSample_processors})
+add_executable(dxFeedCppSample src/main.cpp)
 
 add_subdirectory(thirdparty/date-3.0.1)
+add_subdirectory(dxfeedcpp)
 
 target_include_directories(dxFeedCppSample PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/include>
@@ -36,7 +17,7 @@ target_include_directories(dxFeedCppSample PRIVATE
 
 target_link_directories(dxFeedCppSample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dxFeedCApi/lib)
 target_link_libraries(dxFeedCppSample PRIVATE debug DXFeedd_64 optimized DXFeed_64)
-target_link_libraries(dxFeedCppSample PRIVATE date::date)
+target_link_libraries(dxFeedCppSample PRIVATE date::date dxfeedcpp::dxfeedcpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(MACOSX TRUE)
@@ -74,5 +55,9 @@ else ()
     add_custom_command(TARGET dxFeedCppSample POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_SOURCE_DIR}/thirdparty/dxFeedCApi/lib/libDXFeedd_64.so
             ${CMAKE_CURRENT_BINARY_DIR}/libDXFeedd_64.so)
-    target_link_libraries(dxFeedCppSample PRIVATE pthread)
+endif ()
+
+if (NOT MSVC)
+    find_package(Threads)
+    target_link_libraries(dxFeedCppSample PUBLIC Threads::Threads)
 endif ()

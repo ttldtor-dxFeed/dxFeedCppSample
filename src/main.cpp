@@ -5,17 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "converters/DateTimeConverter.hpp"
-#include "tools/EventsCollector.hpp"
-#include "wrappers/Candle.hpp"
-#include "wrappers/DXFeed.hpp"
-#include "wrappers/Quote.hpp"
-
-#include "processors/AbstractEventCheckingProcessor.hpp"
-#include "processors/CompositeProcessor.hpp"
-#include "wrappers/Connection.hpp"
-#include "wrappers/EventTraits.hpp"
-#include "wrappers/Subscription.hpp"
+#include <DXFeed.hpp>
 
 struct QuoteProcessor : dxfcpp::AbstractEventCheckingProcessor<dxfcpp::Quote> {
     explicit QuoteProcessor() noexcept = default;

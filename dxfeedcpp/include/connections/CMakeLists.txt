@@ -1,0 +1,2 @@
+add_library(dxfeedcppconnections INTERFACE)
+add_library(dxfeedcpp::connections ALIAS dxfeedcppconnections)
