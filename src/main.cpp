@@ -58,7 +58,7 @@ void testQuoteSubscription(dxfcpp::Connection::Ptr c, std::initializer_list<std:
  */
 std::vector<dxfcpp::Candle::Ptr> testCandleSnapshot(dxfcpp::Connection::Ptr c, const std::string &candleSymbol,
                                                     std::uint64_t fromTime, std::uint64_t toTime, long timeout) {
-    return c->getTimeSeriesFuture<dxfcpp::Candle>(candleSymbol, fromTime, toTime, 10).get();
+    return c->getTimeSeriesFuture<dxfcpp::Candle>(candleSymbol, fromTime, toTime, timeout).get();
 }
 
 int main() {
