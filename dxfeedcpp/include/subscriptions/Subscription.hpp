@@ -401,19 +401,17 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
         std::mutex cvMutex_{};
         std::condition_variable cv_{};
 
-        std::string symbol_;
         std::uint64_t fromTime_;
         std::uint64_t toTime_;
 
       public:
         /**
          *
-         * @param symbol
          * @param fromTime
          * @param toTime
          */
-        HistoryBuffer(std::string symbol, std::uint64_t fromTime, std::uint64_t toTime)
-            : symbol_{std::move(symbol)}, fromTime_{fromTime}, toTime_{toTime} {}
+        HistoryBuffer(std::uint64_t fromTime, std::uint64_t toTime)
+            : fromTime_{fromTime}, toTime_{toTime} {}
 
         /**
          *
@@ -451,28 +449,30 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
             if (!event)
                 return;
 
+            typename E::Ptr copy = std::make_shared<E>(*event);
+
             std::lock_guard<std::mutex> guard(eventsMutex_);
 
-            if (event->getTime() >= fromTime_ && event->getTime() <= toTime_) {
-                bool remove = dxfcpp::EventFlag::REMOVE_EVENT.in(event->getEventFlags());
+            if (copy->getTime() >= fromTime_ && copy->getTime() <= toTime_) {
+                bool remove = dxfcpp::EventFlag::REMOVE_EVENT.in(copy->getEventFlags());
 
                 // Clear the event flags
-                event->setEventFlags(dxfcpp::EventFlagsMask());
+                copy->setEventFlags(dxfcpp::EventFlagsMask());
 
-                auto found = events_.find(event->getIndex());
+                auto found = events_.find(copy->getIndex());
 
                 if (found == events_.end()) {
                     if (!remove) {
-                        events_.emplace(event->getIndex(), event);
+                        events_.emplace(copy->getIndex(), copy);
                     }
                 } else if (remove) {
                     events_.erase(found);
                 } else {
-                    found->second = event;
+                    found->second = copy;
                 }
             }
 
-            if (event->getTime() <= fromTime_ || EventFlag::SNAPSHOT_SNIP.in(event->getEventFlags())) {
+            if (copy->getTime() <= fromTime_ || EventFlag::SNAPSHOT_SNIP.in(copy->getEventFlags())) {
                 done();
             }
         }
@@ -513,19 +513,19 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
                     return {};
                 }
 
-                HistoryBuffer buffer{symbol, fromTime, toTime};
+                auto buffer = std::make_shared<HistoryBuffer>(fromTime, toTime);
                 auto sub = connection->createTimeSeriesSubscription({EventTraits<E>::getEventType()}, fromTime);
 
                 if (sub == TimeSeriesSubscription::INVALID)
                     return {};
 
-                sub->onEvent() += [&buffer](dxfcpp::Event::Ptr e) { buffer.applyEventData(e); };
-                connection->onClose() += [&buffer]() { buffer.done(); };
+                sub->onEvent() += [buffer](dxfcpp::Event::Ptr e) { buffer->applyEventData(e); };
+                connection->onClose() += [buffer]() { buffer->done(); };
                 sub->addSymbol(symbol);
 
-                buffer.wait(timeout);
+                buffer->wait(timeout);
 
-                return buffer.getResult();
+                return buffer->getResult();
             },
             connection, symbol, fromTime, toTime, timeout);
     }
