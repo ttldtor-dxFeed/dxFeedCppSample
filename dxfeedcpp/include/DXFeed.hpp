@@ -12,6 +12,7 @@
 
 #include "events/Candle.hpp"
 #include "events/Configuration.hpp"
+#include "events/Direction.hpp"
 #include "events/Event.hpp"
 #include "events/EventFlags.hpp"
 #include "events/EventSource.hpp"

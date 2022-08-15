@@ -110,11 +110,11 @@ struct Quote final : virtual public MarketEvent, virtual public Lasting {
         return std::string("Quote") + "{" + getEventSymbol() +
             ", eventTime=" + DateTimeConverter::toISO(getEventTime()) + ", time=" + DateTimeConverter::toISO(time_) +
             ", timeNanoPart=" + std::to_string(timeNanoPart_) + ", sequence=" + std::to_string(sequence_) +
-            ", bidTime=" + DateTimeConverter::toISO(bidTime_) + ", bidExchange=" + bidExchangeCode_ +
-            ", bidPrice=" + std::to_string(bidPrice_) + ", bidSize=" + std::to_string(bidSize_) +
-            ", askTime=" + DateTimeConverter::toISO(askTime_) + ", askExchange=" + askExchangeCode_ +
-            ", askPrice=" + std::to_string(askPrice_) + ", askSize=" + std::to_string(askSize_) +
-            ", scope=" + scope_.toString() + "}";
+            ", bidTime=" + DateTimeConverter::toISO(bidTime_) +
+            ", bidExchange=" + exchangeCodeToString(bidExchangeCode_) + ", bidPrice=" + std::to_string(bidPrice_) +
+            ", bidSize=" + std::to_string(bidSize_) + ", askTime=" + DateTimeConverter::toISO(askTime_) +
+            ", askExchange=" + exchangeCodeToString(askExchangeCode_) + ", askPrice=" + std::to_string(askPrice_) +
+            ", askSize=" + std::to_string(askSize_) + ", scope=" + scope_.toString() + "}";
     }
 
     template <class Ostream> friend Ostream &&operator<<(Ostream &&os, const Quote &value) {

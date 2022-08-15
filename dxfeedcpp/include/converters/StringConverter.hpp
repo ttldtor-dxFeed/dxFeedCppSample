@@ -12,6 +12,7 @@
 #endif
 
 #include <codecvt>
+#include <sstream>
 
 namespace dxfcpp {
 
@@ -107,6 +108,22 @@ struct StringConverter {
 };
 
 std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> StringConverter::wstringConvert{};
+
+inline std::string exchangeCodeToString(char c) {
+    if (c >= 32 && c <= 126) {
+        return std::string() + c;
+    }
+
+    if (c == 0) {
+        return "\\0";
+    }
+
+    std::ostringstream oss{};
+
+    oss << "\\x" << std::hex << std::to_string(c);
+
+    return oss.str();
+}
 
 } // namespace dxfcpp
 
