@@ -4,6 +4,8 @@
 #    error Please include only the DXFeed.hpp header
 #endif
 
+#include "common/DXFCppConfig.hpp"
+
 #include <cstdint>
 
 namespace dxfcpp {

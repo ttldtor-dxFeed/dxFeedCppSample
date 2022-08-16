@@ -6,31 +6,33 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "EventFlags.hpp"
 #include "EventSource.hpp"
 
 namespace dxfcpp {
 
-///
+/// Base abstract class for all dxFeed C++ API entities
 struct Entity {
-    ///
+    /// The default virtual d-tor
     virtual ~Entity() = default;
-    ///
+    /// Returns a string representation of the entity
     virtual std::string toString() const = 0;
 };
 
-///
+/// Base abstract "shared entity" class. Has some helpers for dynamic polymorphism
 struct SharedEntity : public Entity, std::enable_shared_from_this<SharedEntity> {
-    ///
+    /// The simple type synonym for the SharedEntity type
     using Ptr = std::shared_ptr<SharedEntity>;
 
     /**
-     *
-     * @tparam T
-     * @return
+     * Checks that pointer to the current type could be converted to type T*
+     * In other words: whether type T belongs to the type hierarchy in which the current type resides.
+     * @tparam T The type to check
+     * @return true if type belongs to the type hierarchy in which the current type resides.
      */
-    template <typename T> bool is() const {
+    template <typename T> bool is() const noexcept {
         try {
             auto p = dynamic_cast<const T *>(this);
             (void)(p);
@@ -46,7 +48,9 @@ struct SharedEntity : public Entity, std::enable_shared_from_this<SharedEntity> 
      * @tparam T
      * @return
      */
-    template <typename T> std::shared_ptr<T> sharedAs() { return std::dynamic_pointer_cast<T>(shared_from_this()); }
+    template <typename T> std::shared_ptr<T> sharedAs() noexcept {
+        return std::dynamic_pointer_cast<T>(shared_from_this());
+    }
 
     /**
      *
@@ -73,14 +77,19 @@ struct Event : public SharedEntity {
     virtual void setEventTime(std::uint64_t) = 0;
 };
 
-///
+/**
+ * Base class for all market events. All market events are plain java objects that
+ * extend this class. Market event classes are simple beans with setter and getter methods for their
+ * properties and minimal business logic. All market events have #eventSymbol_ property that is
+ * defined by this class.
+ */
 struct MarketEvent : public Event {
     ///
     using Ptr = std::shared_ptr<MarketEvent>;
 
-  private:
-    std::string eventSymbol_{};
-    std::uint64_t eventTime_{};
+  protected:
+    std::string eventSymbol_;
+    std::uint64_t eventTime_;
 
   protected:
     ///

@@ -41,7 +41,7 @@ void testQuoteSubscription(dxfcpp::Connection::Ptr c, std::initializer_list<std:
 
     auto s = c->createSubscription({dxfcpp::EventType::QUOTE});
 
-    s->onEvent() += [&processor](dxfcpp::Event::Ptr event) -> void { processor.process(std::move(event)); };
+    s->onEvent() += [&processor](dxfcpp::Event::Ptr event) -> void { processor.process(event); };
     s->addSymbols(symbols);
 
     std::this_thread::sleep_for(std::chrono::seconds(15));
@@ -67,7 +67,7 @@ int main() {
     auto c = dxfcpp::DXFeed::connect(
         address, []() {},
         [](const dxfcpp::ConnectionStatus &oldStatus, const dxfcpp::ConnectionStatus &newStatus) {
-            std::cout << "Status: " << oldStatus << " -> " << newStatus << std::endl;
+            std::cout << std::string("Status: ") + oldStatus.toString() + " -> " + newStatus.toString() + "\n";
         });
 
     auto fromTimeString = "2022-08-04T00:00:00Z";
@@ -84,4 +84,13 @@ int main() {
     }
 
     testQuoteSubscription(c, {"AAPL", "IBM"});
+
+    std::cout << "AAPL TRADES\n";
+
+    auto s = c->createSubscription({dxfcpp::EventType::TRADE});
+    s->onEvent() += [](dxfcpp::Event::Ptr e) { std::cout << e->toString() + "\n"; };
+
+    s->addSymbol("AAPL");
+
+    std::this_thread::sleep_for(std::chrono::seconds(15));
 }

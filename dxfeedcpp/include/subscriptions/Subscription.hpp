@@ -298,6 +298,7 @@ const SubscriptionImpl::Ptr SubscriptionImpl::INVALID{new SubscriptionImpl{}};
  */
 struct Subscription final {
     using Ptr = std::shared_ptr<SubscriptionImpl>;
+    using WeakPtr = std::weak_ptr<SubscriptionImpl>;
 
     static const Ptr INVALID;
 
@@ -342,6 +343,7 @@ const Subscription::Ptr Subscription::INVALID{SubscriptionImpl::INVALID};
 struct TimeSeriesSubscription {
     ///
     using Ptr = std::shared_ptr<SubscriptionImpl>;
+    using WeakPtr = std::weak_ptr<SubscriptionImpl>;
 
     ///
     static const Ptr INVALID;
@@ -435,13 +437,6 @@ template <typename E> struct TimeSeriesSubscriptionFuture {
          * @param e
          */
         void applyEventData(Event::Ptr e) {
-            // Do double-check
-            if (!e)
-                return;
-
-            if (!e->is<E>())
-                return;
-
             auto event = e->sharedAs<E>();
 
             if (!event)

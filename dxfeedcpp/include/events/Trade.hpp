@@ -17,6 +17,8 @@ extern "C" {
 #include "converters/DateTimeConverter.hpp"
 #include "converters/StringConverter.hpp"
 
+#include "utils/Utils.hpp"
+
 #include "Direction.hpp"
 #include "Event.hpp"
 #include "EventFlags.hpp"
@@ -24,7 +26,12 @@ extern "C" {
 
 namespace dxfcpp {
 
-struct TradeBase : virtual public MarketEvent, virtual public Lasting {
+/**
+ * Base class for common fields of #Trade and #TradeETH events.
+ * Trade events represent the most recent information that is available about the last trade on the market
+ * at any given moment of time.
+ */
+struct TradeBase : public MarketEvent, public Lasting {
     using Ptr = std::shared_ptr<TradeBase>;
 
   private:
@@ -72,11 +79,11 @@ struct TradeBase : virtual public MarketEvent, virtual public Lasting {
      * 2. ETH (extendedTradingHours) - flag that determines current trading session: extended or regular (0 - regular
      *    trading hours, 1 - extended trading hours).
      */
-    unsigned rawFlags_{};
+    std::uint32_t rawFlags_{};
     /// Tick direction of the last trade
     Direction direction_;
     /// Last trade was in extended trading hours
-    bool isETH_{};
+    bool isEth_{};
     /**
      * Last trade scope.
      *
@@ -85,14 +92,21 @@ struct TradeBase : virtual public MarketEvent, virtual public Lasting {
     OrderScope scope_;
 
   public:
+    /**
+     * Constructs an object from event symbol and dxFeed C-API dxf_trade_t
+     *
+     * @param eventSymbol The event symbol
+     * @param trade The dxFeed C-API dxf_trade_t object
+     */
     TradeBase(std::string eventSymbol, const dxf_trade_t &trade)
         : MarketEvent(std::move(eventSymbol)), time_{static_cast<std::uint64_t>(trade.time)}, sequence_{trade.sequence},
           timeNanoPart_{trade.time_nanos}, exchangeCode_{StringConverter::wCharToUtf8(trade.exchange_code)},
           price_{trade.price}, size_{trade.size}, tick_{trade.tick}, change_{trade.change}, dayId_{trade.day_id},
-          dayVolume_{trade.day_volume}, dayTurnover_{trade.day_turnover}, rawFlags_{static_cast<unsigned>(
+          dayVolume_{trade.day_volume}, dayTurnover_{trade.day_turnover}, rawFlags_{static_cast<std::uint32_t>(
                                                                               trade.raw_flags)},
-          direction_{Direction::get(trade.direction)}, isETH_{static_cast<bool>(trade.is_eth)}, scope_{OrderScope::get(
+          direction_{Direction::get(trade.direction)}, isEth_{static_cast<bool>(trade.is_eth)}, scope_{OrderScope::get(
                                                                                                     trade.scope)} {
+        // Tries to infer the value of direction from tick if direction is UNDEFINED.
         if (direction_ == Direction::UNDEFINED) {
             if (tick_ == 1) {
                 direction_ = Direction::ZERO_UP;
@@ -109,72 +123,89 @@ struct TradeBase : virtual public MarketEvent, virtual public Lasting {
         : MarketEvent(other), time_{other.time_}, sequence_{other.sequence_}, timeNanoPart_{other.timeNanoPart_},
           exchangeCode_{other.exchangeCode_}, price_{other.price_}, size_{other.size_}, tick_{other.tick_},
           change_{other.change_}, dayId_{other.dayId_}, dayVolume_{other.dayVolume_}, dayTurnover_{other.dayTurnover_},
-          rawFlags_{other.rawFlags_}, direction_{other.direction_}, isETH_{other.isETH_}, scope_{other.scope_} {}
+          rawFlags_{other.rawFlags_}, direction_{other.direction_}, isEth_{other.isEth_}, scope_{other.scope_} {}
     TradeBase(TradeBase &&other) noexcept
         : MarketEvent(std::move(other)), time_{other.time_}, sequence_{other.sequence_},
           timeNanoPart_{other.timeNanoPart_}, exchangeCode_{other.exchangeCode_}, price_{other.price_},
           size_{other.size_}, tick_{other.tick_}, change_{other.change_}, dayId_{other.dayId_},
           dayVolume_{other.dayVolume_}, dayTurnover_{other.dayTurnover_}, rawFlags_{other.rawFlags_},
-          direction_{std::move(other.direction_)}, isETH_{other.isETH_}, scope_{std::move(other.scope_)} {}
+          direction_{std::move(other.direction_)}, isEth_{other.isEth_}, scope_{std::move(other.scope_)} {}
     explicit TradeBase(std::string eventSymbol)
         : MarketEvent(std::move(eventSymbol)), direction_(Direction::UNDEFINED), scope_(OrderScope::UNKNOWN) {}
     ~TradeBase() override = default;
 
-    // TODO: utils
-    /**
-     * Returns quotient according to number theory - i.e. when remainder is zero or positive.
-     *
-     * @param a dividend
-     * @param b divisor
-     * @return quotient according to number theory
-     */
-    static std::int32_t div(std::int32_t a, std::int32_t b) {
-        return a >= 0 ? a / b : b >= 0 ? (a + 1) / b - 1 : (a + 1) / b + 1;
-    }
+    /// Returns the last trade time
+    uint64_t getTime() const { return time_; }
 
-    static std::int32_t getYearMonthDayByDayId(std::int32_t dayId) {
-        std::int32_t j = dayId + 2472632; // this shifts the epoch back to astronomical year -4800
-        std::int32_t g = div(j, 146097);
-        std::int32_t dg = j - g * 146097;
-        std::int32_t c = (dg / 36524 + 1) * 3 / 4;
-        std::int32_t dc = dg - c * 36524;
-        std::int32_t b = dc / 1461;
-        std::int32_t db = dc - b * 1461;
-        std::int32_t a = (db / 365 + 1) * 3 / 4;
-        std::int32_t da = db - a * 365;
-        std::int32_t y = g * 400 + c * 100 + b * 4 +
-            a; // this is the integer number of full years elapsed since March 1, 4801 BC at 00:00 UTC
-        std::int32_t m = (da * 5 + 308) / 153 -
-            2; // this is the integer number of full months elapsed since the last March 1 at 00:00 UTC
-        std::int32_t d =
-            da - (m + 4) * 153 / 5 + 122; // this is the number of days elapsed since day 1 of the month at 00:00 UTC
-        std::int32_t yyyy = y - 4800 + (m + 2) / 12;
-        std::int32_t mm = (m + 2) % 12 + 1;
-        std::int32_t dd = d + 1;
-        std::int32_t yyyymmdd = std::abs(yyyy) * 10000 + mm * 100 + dd;
-        return yyyy >= 0 ? yyyymmdd : -yyyymmdd;
-    }
+    /// Returns the sequence number of the last trade (to distinguish trades that have the same #time_)
+    int32_t getSequence() const { return sequence_; }
+
+    ///
+    int32_t getTimeNanoPart() const { return timeNanoPart_; }
+
+    ///
+    char getExchangeCode() const { return exchangeCode_; }
+
+    ///
+    double getPrice() const { return price_; }
+
+    ///
+    double getSize() const { return size_; }
+
+    ///
+    int32_t getTick() const { return tick_; }
+
+    ///
+    double getChange() const { return change_; }
+
+    ///
+    int32_t getDayId() const { return dayId_; }
+
+    ///
+    double getDayVolume() const { return dayVolume_; }
+
+    ///
+    double getDayTurnover() const { return dayTurnover_; }
+
+    ///
+    std::uint32_t getFlags() const { return rawFlags_; }
+
+    ///
+    const Direction &getDirection() const { return direction_; }
+
+    ///
+    bool isExtendedTradingHours() const { return isEth_; }
+
+    ///
+    const OrderScope &getScope() const { return scope_; }
 
     std::string baseFieldsToString() const {
-        return getEventSymbol() + ", eventTime=" + DateTimeConverter::toISO(getEventTime()) +
+        return std::string() + getEventSymbol() + ", eventTime=" + DateTimeConverter::toISO(getEventTime()) +
             ", time=" + DateTimeConverter::toISO(time_) + ", sequence=" + std::to_string(sequence_) +
             ", timeNanoPart=" + std::to_string(timeNanoPart_) + ", exchange=" + exchangeCodeToString(exchangeCode_) +
             ", price=" + std::to_string(price_) + ", size=" + std::to_string(size_) +
             ", tick=" + std::to_string(tick_) + ", change=" + std::to_string(change_) +
-            ", day=" + std::to_string(getYearMonthDayByDayId(dayId_)) + ", dayVolume=" + std::to_string(dayVolume_) +
-            ", dayTurnover=" + std::to_string(dayTurnover_) + ", direction=" + direction_.toString() +
-            ", ETH=" + std::to_string(isETH_);
+            ", day=" + std::to_string(day_util::getYearMonthDayByDayId(dayId_)) +
+            ", dayVolume=" + std::to_string(dayVolume_) + ", dayTurnover=" + std::to_string(dayTurnover_) +
+            ", flags=" + string::toHex(rawFlags_) + ", direction=" + direction_.toString() +
+            ", ETH=" + std::to_string(isEth_);
     }
 };
 
-struct Trade final : virtual public TradeBase {
-    Trade(std::string eventSymbol, const dxf_trade_t &trade) {}
-    std::string toString() const override { return std::string(); }
+struct Trade final : public TradeBase {
+    Trade(std::string eventSymbol, const dxf_trade_t &trade) : TradeBase(std::move(eventSymbol), trade) {}
+
+    explicit Trade(std::string eventSymbol) : TradeBase(std::move(eventSymbol)) {}
+
+    std::string toString() const override { return std::string("Trade{") + baseFieldsToString() + "}"; }
 };
 
-struct TradeETH final : virtual public TradeBase {
-    TradeETH(std::string eventSymbol, const dxf_trade_eth_t &trade) {}
-    std::string toString() const override { return std::string(); }
+struct TradeETH final : public TradeBase {
+    TradeETH(std::string eventSymbol, const dxf_trade_eth_t &trade) : TradeBase(std::move(eventSymbol), trade) {}
+
+    explicit TradeETH(std::string eventSymbol) : TradeBase(std::move(eventSymbol)) {}
+
+    std::string toString() const override { return std::string("TradeETH{") + baseFieldsToString() + "}"; }
 };
 
 } // namespace dxfcpp

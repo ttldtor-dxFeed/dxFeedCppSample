@@ -21,7 +21,7 @@ extern "C" {
 
 namespace dxfcpp {
 
-struct Greeks final : virtual public MarketEvent, virtual public TimeSeries, virtual public Lasting {
+struct Greeks final : public MarketEvent, public TimeSeries, public Lasting {
   private:
     std::string eventSymbol_{};
     /// Transactional event flags

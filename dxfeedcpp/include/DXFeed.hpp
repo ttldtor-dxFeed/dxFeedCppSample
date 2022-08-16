@@ -4,6 +4,8 @@
 
 #include "common/DXFCppConfig.hpp"
 
+#include "utils/Utils.hpp"
+
 #include "connections/Connection.hpp"
 #include "connections/ConnectionStatus.hpp"
 

@@ -21,7 +21,7 @@ extern "C" {
 
 namespace dxfcpp {
 
-struct Profile final : virtual public MarketEvent, virtual public Lasting {
+struct Profile final : public MarketEvent, public Lasting {
     std::string toString() const override { return std::string(); }
 };
 

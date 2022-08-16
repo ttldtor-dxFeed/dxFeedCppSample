@@ -35,7 +35,7 @@ class CompositeProcessor : virtual public AbstractEventProcessor {
         : CompositeProcessor(processors.begin(), processors.end()) {}
 
     void process(dxfcpp::Event::Ptr event) override {
-        for (const auto &p : processors_) {
+        for (auto p : processors_) {
             p->process(event);
         }
     }

@@ -78,6 +78,7 @@ template <typename T> struct EventTraits<const volatile T> : public EventTraits<
 
 struct Quote;
 struct Candle;
+struct Trade;
 // TODO: add events
 
 template <> struct EventTraits<Quote> : public EventTraitsBase {
@@ -105,6 +106,19 @@ template <> struct EventTraits<Candle> : public EventTraitsBase {
     static DXFCPP_USE_CONSTEXPR bool isIndexedEvent = true;
     static DXFCPP_USE_CONSTEXPR bool isLastingEvent = true;
     static DXFCPP_USE_CONSTEXPR bool isTimeSeriesEvent = true;
+};
+
+template <> struct EventTraits<Trade> : public EventTraitsBase {
+    using Type = Trade;
+
+    static EventType getEventType() { return EventType::TRADE; }
+
+    static DXFCPP_USE_CONSTEXPR bool isSpecialized = true;
+    using CApiEventType = dxf_trade_t;
+    static DXFCPP_USE_CONSTEXPR unsigned cApiEventId = dx_eid_trade;
+    static DXFCPP_USE_CONSTEXPR unsigned cApiEventMask = DXF_ET_TRADE;
+    static DXFCPP_USE_CONSTEXPR bool isMarketEvent = true;
+    static DXFCPP_USE_CONSTEXPR bool isLastingEvent = true;
 };
 
 } // namespace dxfcpp

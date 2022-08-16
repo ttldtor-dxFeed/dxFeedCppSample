@@ -26,7 +26,7 @@ namespace dxfcpp {
  *
  * @details Candle event with open, high, low, close prices and other information for a specific period.
  */
-struct Candle final : virtual public Event, virtual public TimeSeries, virtual public Lasting {
+struct Candle final : public Event, public TimeSeries, public Lasting {
     using Ptr = std::shared_ptr<Candle>;
 
   private:

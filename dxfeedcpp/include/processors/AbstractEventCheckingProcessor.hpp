@@ -24,11 +24,6 @@ template <typename E> struct AbstractEventCheckingProcessor : AbstractEventProce
      * @param e
      */
     void process(dxfcpp::Event::Ptr e) override {
-        if (!e)
-            return;
-        if (!e->is<E>())
-            return;
-
         auto event = e->sharedAs<E>();
 
         if (!event)

@@ -13,10 +13,10 @@ add_subdirectory(include/events)
 add_subdirectory(include/helpers)
 add_subdirectory(include/processors)
 add_subdirectory(include/subscriptions)
-add_subdirectory(include/tools)
+add_subdirectory(include/utils)
 
 target_link_libraries(dxfeedcpp INTERFACE dxfeedcpp::common dxfeedcpp::connections dxfeedcpp::converters
-        dxfeedcpp::events dxfeedcpp::helpers dxfeedcpp::processors dxfeedcpp::subscriptions dxfeedcpp::tools)
+        dxfeedcpp::events dxfeedcpp::helpers dxfeedcpp::processors dxfeedcpp::subscriptions dxfeedcpp::utils)
 
 target_include_directories(dxfeedcpp INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")

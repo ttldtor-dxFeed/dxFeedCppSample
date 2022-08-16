@@ -21,9 +21,8 @@ extern "C" {
 
 namespace dxfcpp {
 
-struct OrderBase : virtual public MarketEvent, virtual public Indexed {
+struct OrderBase : public MarketEvent, public Indexed {
   private:
-    std::string eventSymbol_{};
     /// Transactional event flags
     EventFlagsMask eventFlags_{};
 

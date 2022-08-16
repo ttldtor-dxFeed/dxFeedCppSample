@@ -28,7 +28,7 @@ namespace dxfcpp {
  * represents the most recent information that is available about the best quote on the market at any given moment of
  * time.
  */
-struct Quote final : virtual public MarketEvent, virtual public Lasting {
+struct Quote final : public MarketEvent, public Lasting {
     using Ptr = std::shared_ptr<Quote>;
 
   private:

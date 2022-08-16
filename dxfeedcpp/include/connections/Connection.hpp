@@ -43,8 +43,8 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     Handler<void(ConnectionStatus, ConnectionStatus)> onConnectionStatusChanged_{};
     Handler<void()> onClose_{};
 
-    std::vector<Subscription::Ptr> subscriptions_{};
-    std::vector<TimeSeriesSubscription::Ptr> timeSeriesSubscriptions_{};
+    std::vector<Subscription::WeakPtr> subscriptions_{};
+    std::vector<TimeSeriesSubscription::WeakPtr> timeSeriesSubscriptions_{};
 
     template <typename F = std::function<void(Ptr &)>>
     static Ptr createImpl(const std::string &address, F &&beforeConnect) {
@@ -79,11 +79,15 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
 
         if (connectionHandle_ != nullptr) {
             for (const auto &sub : subscriptions_) {
-                sub->close();
+                if (auto s = sub.lock()) {
+                    s->close();
+                }
             }
 
             for (const auto &sub : timeSeriesSubscriptions_) {
-                sub->close();
+                if (auto s = sub.lock()) {
+                    s->close();
+                }
             }
 
             dxf_close_connection(connectionHandle_);
