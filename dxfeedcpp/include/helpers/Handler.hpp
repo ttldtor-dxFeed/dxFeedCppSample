@@ -18,14 +18,19 @@ namespace dxfcpp {
 template <typename Signature> struct Handler;
 
 /**
+ * A thread-safe class that allows to asynchronously notify listeners with a given signature.
+ * Listeners can be any callable entities.
+ * This class executes incoming events sequentially using a simple fixed-length circular buffer implementation.
  *
- * @tparam ArgTypes
+ * @tparam ArgTypes The arguments "signature"
  */
 template <typename... ArgTypes> struct Handler<void(ArgTypes...)> final {
     ///
     using ListenerType = std::function<void(ArgTypes...)>;
 
   private:
+    static const unsigned MAIN_FUTURES_DEFAULT_SIZE = 1024;
+
     std::recursive_mutex listenersMutex_{};
     std::unordered_map<std::size_t, ListenerType> listeners_{};
     std::size_t lastId_{};
@@ -50,17 +55,19 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> final {
 
   public:
     /**
+     * Creates the new handler by specified size of circular buffer of futures
      *
-     * @param mainFuturesSize
+     * @param mainFuturesSize The size of the circular buffer of futures
      */
-    explicit Handler(std::size_t mainFuturesSize = 256)
+    explicit Handler(std::size_t mainFuturesSize = MAIN_FUTURES_DEFAULT_SIZE)
         : mainFuturesCurrentIndex_{0ULL}, mainFuturesSize_{mainFuturesSize} {
         mainFutures_.reserve(mainFuturesSize);
     }
 
     /**
+     * Calls the listeners and pass the ars to them
      *
-     * @param args
+     * @param args The listeners arguments
      */
     void handle(ArgTypes &&...args) {
         auto f = handleImpl(std::forward<ArgTypes>(args)...);
@@ -80,15 +87,17 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> final {
     }
 
     /**
+     * Calls the listeners and pass the ars to them
      *
-     * @param args
+     * @param args The listeners arguments
      */
     void operator()(ArgTypes &&...args) { return handle(std::forward<ArgTypes>(args)...); }
 
     /**
+     * Adds the listener
      *
-     * @param listener
-     * @return
+     * @param listener The listener
+     * @return The listener id
      */
     std::size_t add(ListenerType &&listener) {
         std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
@@ -100,15 +109,17 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> final {
     }
 
     /**
+     * Adds the listener
      *
-     * @param listener
-     * @return
+     * @param listener The listener
+     * @return The listener id
      */
     std::size_t operator+=(ListenerType &&listener) { return add(std::forward<ListenerType>(listener)); }
 
     /**
+     * Removes a listener by the id
      *
-     * @param id
+     * @param id The listener id
      */
     void remove(std::size_t id) {
         std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
@@ -119,8 +130,9 @@ template <typename... ArgTypes> struct Handler<void(ArgTypes...)> final {
     }
 
     /**
+     * Removes a listener by the id
      *
-     * @param id
+     * @param id The listener id
      */
     void operator-=(std::size_t id) { return remove(id); }
 };

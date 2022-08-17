@@ -46,16 +46,18 @@
 
 namespace dxfcpp {
 
+/// The main "anchor"
 namespace DXFeed {
 
 /**
+ * Creates the new connection to specified address with specified onDisconnect & onConnectionStatusChanged listeners
  *
- * @tparam OnDisconnectListener
- * @tparam OnConnectionStatusChangedListener
- * @param address
- * @param onDisconnectListener
- * @param onConnectionStatusChangedListener
- * @return
+ * @tparam OnDisconnectListener The type of a onDisconnect listener (it could be any callable)
+ * @tparam OnConnectionStatusChangedListener The type of onConnectionStatusChanged listener
+ * @param address The address to connect
+ * @param onDisconnectListener The onDisconnect listener
+ * @param onConnectionStatusChangedListener The onConnectionStatusChanged listener
+ * @return A shared pointer to the new connection object or Connection::INVALID
  */
 template <typename OnDisconnectListener = typename Handler<void()>::ListenerType,
           typename OnConnectionStatusChangedListener =
@@ -67,9 +69,10 @@ inline Connection::Ptr connect(const std::string &address, OnDisconnectListener 
 }
 
 /**
+ * Creates the new connection to specified address
  *
- * @param address
- * @return
+ * @param address The address to connect
+ * @return A shared pointer to the new connection object or Connection::INVALID
  */
 inline Connection::Ptr connect(const std::string &address) { return Connection::create(address); }
 } // namespace DXFeed
