@@ -26,13 +26,25 @@ extern "C" {
 namespace dxfcpp {
 
 /**
- * TODO:
+ * The thread-safe wrapper around the dxf_connection_t dxFeed C-API type
+ *
+ * Allows you to create connections, close connections, reuse connections.
+ * Allows you to create different types of subscriptions and use RAII to close them if necessary.
+ *
+ * Allows you to get the current status of the connection, as well as receive a notification if the connection was
+ * interrupted from the outside (for example, the network adapter broke or the connection was interrupted by the
+ * firewall).
+ *
+ * At the moment, the implementation does not create shared buffers for TICKER, STREAM, HISTORY contracts.
+ * New subscriptions can affect old ones, since for the server it all happens in one session.
+ * In other words, there is no multiplexing and subscription caching.
  */
 struct Connection final : public std::enable_shared_from_this<Connection> {
-    ///
+    /// The synonym for an shared pointer to a Connection object
     using Ptr = std::shared_ptr<Connection>;
 
-    ///
+    /// An invalid pointer that is returned if something went wrong. Usually, operations with an invalid pointer
+    /// do not give any result, since when trying to perform an operation, the handle is checked.
     static const Ptr INVALID;
 
   private:
@@ -98,9 +110,10 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
   public:
     Connection &operator=(Connection &) = delete;
 
+    /// Tries to "send" the onClose notification (used by TimeSeriesFuture) and tries to close all subscriptions
     ~Connection() { close(); }
 
-    ///
+    /// Returns the current connection status (default value = NOT_CONNECTED)
     ConnectionStatus getConnectionStatus() const {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
 
@@ -114,24 +127,28 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
         return ConnectionStatus::NOT_CONNECTED;
     }
 
-    ///
+    /// Returns the onDisconnect handler that notifies all listeners asynchronously that the connection has been
+    /// disconnected.
     Handler<void()> &onDisconnect() { return onDisconnect_; }
 
+    /// Returns the onConnectionStatusChanged handler that notifies all listeners asynchronously that the connection
+    /// connection status has been changed.
     Handler<void(ConnectionStatus, ConnectionStatus)> &onConnectionStatusChanged() {
         return onConnectionStatusChanged_;
     }
 
-    ///
+    /// Returns the onClose handler that notifies all listeners asynchronously that a connection has been closed.
     Handler<void()> &onClose() { return onClose_; }
 
     /**
+     * Creates the new connection to specified address with specified onDisconnect & onConnectionStatusChanged listeners
      *
-     * @tparam OnDisconnectListener
-     * @tparam OnConnectionStatusChangedListener
-     * @param address
-     * @param onDisconnectListener
-     * @param onConnectionStatusChangedListener
-     * @return
+     * @tparam OnDisconnectListener The type of a onDisconnect listener (it could be any callable)
+     * @tparam OnConnectionStatusChangedListener The type of onConnectionStatusChanged listener
+     * @param address The address to connect
+     * @param onDisconnectListener The onDisconnect listener
+     * @param onConnectionStatusChangedListener The onConnectionStatusChanged listener
+     * @return A shared pointer to the new connection object or Connection::INVALID
      */
     template <typename OnDisconnectListener = typename Handler<void()>::ListenerType,
               typename OnConnectionStatusChangedListener =
@@ -146,18 +163,21 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
     /**
+     * Creates the new connection to specified address
      *
-     * @param address
-     * @return
+     * @param address The address to connect
+     * @return A shared pointer to the new connection object or Connection::INVALID
      */
     static Ptr create(const std::string &address) {
         return createImpl(address, [](Ptr &) {});
     }
 
     /**
+     * Creates the new subscription by specified event types mask. Subscription contracts (TICKER, STREAM, HISTORY) are
+     * inferred by event type in the mask.
      *
-     * @param eventTypesMask
-     * @return
+     * @param eventTypesMask The event types mask
+     * @return A shared pointer to the new Subscription object or Subscription::INVALID
      */
     Subscription::Ptr createSubscription(const EventTypesMask &eventTypesMask) {
         std::lock_guard<std::recursive_mutex> lock{mutex_};
@@ -176,20 +196,24 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
     /**
+     * Creates the new subscription by specified event types which accessible from container that represented by
+     * iterators. Subscription contracts (TICKER, STREAM, HISTORY) are inferred by event type.
      *
-     * @tparam EventTypeIt
-     * @param begin
-     * @param end
-     * @return
+     * @tparam EventTypeIt The iterator type of the container with event types
+     * @param begin The first iterator of the container with event type
+     * @param end The last iterator of the container with event type
+     * @return A shared pointer to the new Subscription object or Subscription::INVALID
      */
     template <typename EventTypeIt> Subscription::Ptr createSubscription(EventTypeIt begin, EventTypeIt end) {
         return createSubscription(EventTypesMask(begin, end));
     }
 
     /**
+     * Creates the new subscription by specified event types. Subscription contracts (TICKER, STREAM, HISTORY) are
+     * inferred by event type.
      *
-     * @param eventTypes
-     * @return
+     * @param eventTypes The initializer list with event types
+     * @return A shared pointer to the new Subscription object or Subscription::INVALID
      */
     Subscription::Ptr createSubscription(std::initializer_list<EventType> eventTypes) {
         return createSubscription(eventTypes.begin(), eventTypes.end());

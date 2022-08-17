@@ -12,15 +12,39 @@
 
 namespace dxfcpp {
 
-///
+/// The enumeration type that provides additional information about the dxFeed C++-API event type
+/// Useful when used as a subscription parameter.
 class EventType {
+    /// The dxFeed C-API event id corresponding to the current enum object.
     unsigned cApiEventId_;
+
+    /// The dxFeed C-API event mask corresponding to the current enum object.
     unsigned cApiEventMask_;
+
+    // A flag that indicates that the current enum object is characterizing the Lasting (TICKER) event.
     bool isLasting_;
+
+    // A flag that indicates that the current enum object is characterizing the Indexed event.
     bool isIndexed_;
+
+    // A flag that indicates that the current enum object is characterizing the TimeSeries (HISTORY) event.
     bool isTimeSeries_;
+
+    // A flag that indicates that the current enum object is characterizing the OnlyIndexed (Indexed, but not
+    // TimeSeries) event.
     bool isOnlyIndexed_;
 
+    /**
+     * Creates the new enum object by event parameters
+     *
+     * @param cApiEventId The dxFeed C-API event id
+     * @param cApiEventMask The dxFeed C-API event  mask
+     * @param isLasting The flag that indicates that the current enum object is characterizing the Lasting (TICKER)
+     * event.
+     * @param isIndexed The flag that indicates that the current enum object is characterizing the Indexed event.
+     * @param isTimeSeries The flag that indicates that the current enum object is characterizing the Lasting (HISTORY)
+     * event.
+     */
     EventType(unsigned cApiEventId, unsigned cApiEventMask, bool isLasting, bool isIndexed = false,
               bool isTimeSeries = false)
         : cApiEventId_{cApiEventId}, cApiEventMask_{cApiEventMask}, isLasting_{isLasting}, isIndexed_{isIndexed ||
@@ -92,10 +116,16 @@ template <> struct hash<dxfcpp::EventType> {
 
 namespace dxfcpp {
 
+// The wrapper around the event type mask (enum) and operators.
 class EventTypesMask final {
     unsigned mask_;
 
   public:
+    static const EventTypesMask LASTING;
+    static const EventTypesMask INDEXED;
+    static const EventTypesMask TIME_SERIES;
+    static const EventTypesMask ONLY_INDEXED;
+
     explicit EventTypesMask(unsigned mask) : mask_{mask} {}
 
     template <typename EventTypeIt> EventTypesMask(EventTypeIt begin, EventTypeIt end) {
@@ -103,18 +133,45 @@ class EventTypesMask final {
                                 [](unsigned mask, const EventType &flag) { return mask | flag.getCApiEventMask(); });
     }
 
-    explicit EventTypesMask(std::initializer_list<EventType> eventTypes)
+    EventTypesMask(std::initializer_list<EventType> eventTypes)
         : EventTypesMask(eventTypes.begin(), eventTypes.end()) {}
 
     DXFCPP_CONSTEXPR unsigned getMask() const { return mask_; }
-
-    friend EventTypesMask operator|(const EventTypesMask &eventTypesMask, const EventType &eventType) {
-        return EventTypesMask{eventTypesMask.mask_ | eventType.getCApiEventMask()};
-    }
-
-    friend EventTypesMask operator|(const EventType &eventType1, const EventType &eventType2) {
-        return EventTypesMask{eventType1.getCApiEventMask() | eventType2.getCApiEventMask()};
-    }
 };
+
+EventTypesMask operator|(const EventTypesMask &eventTypesMask, const EventType &eventType) {
+    return EventTypesMask{eventTypesMask.getMask() | eventType.getCApiEventMask()};
+}
+
+EventTypesMask operator|(const EventTypesMask &eventTypesMask, const EventTypesMask &eventTypesMask2) {
+    return EventTypesMask{eventTypesMask.getMask() | eventTypesMask2.getMask()};
+}
+
+EventTypesMask operator|(const EventType &eventType1, const EventType &eventType2) {
+    return EventTypesMask{eventType1.getCApiEventMask() | eventType2.getCApiEventMask()};
+}
+
+EventTypesMask operator&(const EventTypesMask &eventTypesMask, const EventType &eventType) {
+    return EventTypesMask{eventTypesMask.getMask() & eventType.getCApiEventMask()};
+}
+
+EventTypesMask operator&(const EventTypesMask &eventTypesMask, const EventTypesMask &eventTypesMask2) {
+    return EventTypesMask{eventTypesMask.getMask() & eventTypesMask2.getMask()};
+}
+
+EventTypesMask operator&(const EventType &eventType1, const EventType &eventType2) {
+    return EventTypesMask{eventType1.getCApiEventMask() & eventType2.getCApiEventMask()};
+}
+
+const EventTypesMask EventTypesMask::LASTING{EventType::TRADE | EventType::QUOTE | EventType::SUMMARY |
+                                             EventType::PROFILE | EventType::CANDLE | EventType::TRADE_ETH |
+                                             EventType::GREEKS | EventType::THEO_PRICE | EventType::UNDERLYING |
+                                             EventType::CONFIGURATION};
+const EventTypesMask EventTypesMask::INDEXED{EventType::ORDER | EventType::TIME_AND_SALE | EventType::CANDLE |
+                                             EventType::SPREAD_ORDER | EventType::GREEKS | EventType::THEO_PRICE |
+                                             EventType::UNDERLYING | EventType::SERIES};
+const EventTypesMask EventTypesMask::TIME_SERIES{EventType::TIME_AND_SALE | EventType::CANDLE | EventType::GREEKS |
+                                                 EventType::THEO_PRICE | EventType::UNDERLYING};
+const EventTypesMask EventTypesMask::ONLY_INDEXED{EventType::ORDER | EventType::SPREAD_ORDER | EventType::SERIES};
 
 } // namespace dxfcpp
