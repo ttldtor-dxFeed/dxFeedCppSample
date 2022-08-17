@@ -75,3 +75,22 @@ mkdir build
 cd build
 cmake -G "Visual Studio 14 2015" -A x64 -DCMAKE_BUILD_TYPE=Release ..
 ```
+
+## TBD
+
+- Candle' doxygen comments
+- Summary
+- Profile
+- Order\SpreadOrder
+- TimeAndSale
+- Greeks
+- TheoPrice
+- Underlying
+- Series
+- Configuration
+- Other doxygen comments
+- Sub multiplexing\caching
+- Stream\Ticker buffer
+- FOD\FOB
+- Incremental
+- Counter tool
