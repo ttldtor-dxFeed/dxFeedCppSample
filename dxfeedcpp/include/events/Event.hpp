@@ -17,6 +17,7 @@ namespace dxfcpp {
 struct Entity {
     /// The default virtual d-tor
     virtual ~Entity() = default;
+
     /// Returns a string representation of the entity
     virtual std::string toString() const = 0;
 };
