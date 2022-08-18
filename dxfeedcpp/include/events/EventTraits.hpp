@@ -61,28 +61,32 @@ struct EventTraitsBase {
 };
 
 /**
- * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++ event)
+ * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++
+ * event)
  *
  * @tparam T The type for which additional information is provided.
  */
 template <typename T> struct EventTraits : public EventTraitsBase {};
 
 /**
- * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++ event)
+ * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++
+ * event)
  *
  * @tparam T The type for which additional information is provided.
  */
 template <typename T> struct EventTraits<const T> : public EventTraits<T> {};
 
 /**
- * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++ event)
+ * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++
+ * event)
  *
  * @tparam T The type for which additional information is provided.
  */
 template <typename T> struct EventTraits<volatile T> : public EventTraits<T> {};
 
 /**
- * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++ event)
+ * A basic typed helper that provides additional compile-time information about the type (presumably the dxFeed C++
+ * event)
  *
  * @tparam T The type for which additional information is provided.
  */

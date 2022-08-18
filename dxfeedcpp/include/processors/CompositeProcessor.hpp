@@ -39,7 +39,7 @@ class CompositeProcessor : virtual public AbstractEventProcessor {
      * @param event The dxFeed C++-API event pointer
      */
     void process(dxfcpp::Event::Ptr event) override {
-        for (const auto& p : processors_) {
+        for (const auto &p : processors_) {
             p->process(event);
         }
     }

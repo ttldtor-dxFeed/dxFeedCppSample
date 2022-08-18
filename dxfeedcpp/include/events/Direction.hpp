@@ -22,7 +22,7 @@ template <> struct hash<dxf_direction_t> {
     std::size_t operator()(dxf_direction_t direction) const noexcept { return static_cast<std::size_t>(direction); }
 };
 
-}
+} // namespace std
 
 namespace dxfcpp {
 
@@ -88,9 +88,7 @@ class Direction {
         return std::forward<Ostream>(os) << value.toString();
     }
 
-    bool operator == (const Direction& other) {
-        return direction_ == other.direction_;
-    }
+    bool operator==(const Direction &other) { return direction_ == other.direction_; }
 };
 
 const Direction Direction::UNDEFINED{dxf_dir_undefined, "UNDEFINED"};
