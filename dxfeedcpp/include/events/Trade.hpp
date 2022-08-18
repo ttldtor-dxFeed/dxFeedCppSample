@@ -197,8 +197,8 @@ struct TradeBase : public MarketEvent, public Lasting {
             ", tick=" + std::to_string(tick_) + ", change=" + std::to_string(change_) +
             ", day=" + std::to_string(day_util::getYearMonthDayByDayId(dayId_)) +
             ", dayVolume=" + std::to_string(dayVolume_) + ", dayTurnover=" + std::to_string(dayTurnover_) +
-            ", flags=" + string::toHex(rawFlags_) + ", direction=" + direction_.toString() +
-            ", ETH=" + std::to_string(isEth_);
+            ", rawFlags=" + string::toHex(rawFlags_) + ", scope=" + scope_.toString() +
+            ", direction=" + direction_.toString() + ", ETH=" + std::to_string(isEth_);
     }
 };
 

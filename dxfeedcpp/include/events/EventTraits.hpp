@@ -96,6 +96,7 @@ struct Quote;
 struct Candle;
 struct Trade;
 struct TradeETH;
+struct Summary;
 // TODO: add events
 
 /**
@@ -185,6 +186,21 @@ template <> struct EventTraits<TradeETH> : public EventTraitsBase {
     using CApiEventType = dxf_trade_eth_t;
     static DXFCPP_USE_CONSTEXPR unsigned cApiEventId = dx_eid_trade_eth;
     static DXFCPP_USE_CONSTEXPR unsigned cApiEventMask = DXF_ET_TRADE_ETH;
+    static DXFCPP_USE_CONSTEXPR bool isMarketEvent = true;
+    static DXFCPP_USE_CONSTEXPR bool isLastingEvent = true;
+};
+
+/**
+ * A typed helper that provides additional compile-time information about the Summary type
+ */
+template <> struct EventTraits<Summary> : public EventTraitsBase {
+    using Type = Summary;
+
+    static EventType getEventType() { return EventType::SUMMARY; }
+    static DXFCPP_USE_CONSTEXPR bool isSpecialized = true;
+    using CApiEventType = dxf_summary_t;
+    static DXFCPP_USE_CONSTEXPR unsigned cApiEventId = dx_eid_summary;
+    static DXFCPP_USE_CONSTEXPR unsigned cApiEventMask = DXF_ET_SUMMARY;
     static DXFCPP_USE_CONSTEXPR bool isMarketEvent = true;
     static DXFCPP_USE_CONSTEXPR bool isLastingEvent = true;
 };

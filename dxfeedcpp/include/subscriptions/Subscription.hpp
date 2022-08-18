@@ -285,6 +285,13 @@ class SubscriptionImpl {
 
                 reinterpret_cast<SubscriptionImpl *>(userData)->onEvent_(tradeEth);
             } break;
+
+            case DXF_ET_SUMMARY: {
+                auto cApiSummary = *reinterpret_cast<const dxf_summary_t *>(eventData);
+                auto summary = std::make_shared<Summary>(symbol, cApiSummary);
+
+                reinterpret_cast<SubscriptionImpl *>(userData)->onEvent_(summary);
+            } break;
             }
 
             // TODO: add events

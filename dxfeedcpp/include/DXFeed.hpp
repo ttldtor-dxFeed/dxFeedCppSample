@@ -23,6 +23,7 @@
 #include "events/Greeks.hpp"
 #include "events/Order.hpp"
 #include "events/OrderScope.hpp"
+#include "events/PriceType.hpp"
 #include "events/Profile.hpp"
 #include "events/Quote.hpp"
 #include "events/Series.hpp"
