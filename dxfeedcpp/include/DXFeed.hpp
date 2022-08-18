@@ -27,6 +27,7 @@
 #include "events/Quote.hpp"
 #include "events/Series.hpp"
 #include "events/Summary.hpp"
+#include "events/TheoPrice.hpp"
 #include "events/TimeAndSale.hpp"
 #include "events/Trade.hpp"
 #include "events/Underlying.hpp"
