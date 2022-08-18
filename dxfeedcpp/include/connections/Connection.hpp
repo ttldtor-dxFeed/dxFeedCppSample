@@ -220,10 +220,12 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
     /**
+     * Creates the new subscription to time series events with specified fromTime. Also removes non time series events
+     * from the events mask
      *
-     * @param eventTypesMask
-     * @param fromTime
-     * @return
+     * @param eventTypesMask The event types mask to subscribe
+     * @param fromTime The time from which data must be requested
+     * @return A shared pointer to the new TimeSeriesSubscription object or TimeSeriesSubscription::INVALID
      */
     TimeSeriesSubscription::Ptr createTimeSeriesSubscription(const EventTypesMask &eventTypesMask,
                                                              std::uint64_t fromTime) {
@@ -243,26 +245,31 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
     /**
+     * Creates the new subscription to time series events with specified fromTime. Also removes non time series event
+     * types from the event types
      *
-     * @tparam EventTypeIt
-     * @param begin
-     * @param end
-     * @param fromTime
-     * @return
+     * @tparam EventTypeIt The iterator type of the container with event types
+     * @param begin The first iterator of the container with event type
+     * @param end The last iterator of the container with event type
+     * @param fromTime The time from which data must be requested
+     * @return A shared pointer to the new TimeSeriesSubscription object or TimeSeriesSubscription::INVALID
      */
     template <typename EventTypeIt>
-    Subscription::Ptr createTimeSeriesSubscription(EventTypeIt begin, EventTypeIt end, std::uint64_t fromTime) {
+    TimeSeriesSubscription::Ptr createTimeSeriesSubscription(EventTypeIt begin, EventTypeIt end,
+                                                             std::uint64_t fromTime) {
         return createTimeSeriesSubscription(EventTypesMask(begin, end), fromTime);
     }
 
     /**
+     * Creates the new subscription to time series events with specified fromTime. Also removes non time series event
+     * types from the event types
      *
-     * @param eventTypes
-     * @param fromTime
-     * @return
+     * @param eventTypes The initializer list with event types
+     * @param fromTime The time from which data must be requested
+     * @return A shared pointer to the new TimeSeriesSubscription object or TimeSeriesSubscription::INVALID
      */
-    Subscription::Ptr createTimeSeriesSubscription(std::initializer_list<EventType> eventTypes,
-                                                   std::uint64_t fromTime) {
+    TimeSeriesSubscription::Ptr createTimeSeriesSubscription(std::initializer_list<EventType> eventTypes,
+                                                             std::uint64_t fromTime) {
         return createTimeSeriesSubscription(eventTypes.begin(), eventTypes.end(), fromTime);
     }
 
@@ -270,12 +277,15 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
      * Returns a Future with a vector of smart pointers to the TimeSeries instance of the object
      * (for example, dxfcpp::Candle), or a Future with an empty vector if an error occurred.
      *
+     * If the timeout occurs before the last time series event has been received, then a future will be returned for an
+     * incomplete snapshot of the time series events.
+     *
      * @tparam E TimeSeries class type, e.g. dxfcpp::Candle etc
-     * @param symbol
-     * @param fromTime
-     * @param toTime
-     * @param timeout
-     * @return a Future with a vector of smart pointers
+     * @param symbol The symbol to subscribe
+     * @param fromTime Time from which events will be added to the snapshot (historical event buffer)
+     * @param toTime The time until which events will be added to the snapshot (historical event buffer)
+     * @param timeout The timeout after which the work completes.
+     * @return A Future with a vector of smart pointers to TimeSeries events
      */
     template <typename E>
     std::future<std::vector<typename E::Ptr>> getTimeSeriesFuture(const std::string &symbol, std::uint64_t fromTime,
@@ -285,13 +295,18 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     }
 
     /**
+     * Returns a Future with a vector of smart pointers to the TimeSeries instance of the object
+     * (for example, dxfcpp::Candle), or a Future with an empty vector if an error occurred.
      *
-     * @tparam E
-     * @param symbol
-     * @param fromTime
-     * @param toTime
-     * @param timeout
-     * @return
+     * If the timeout occurs before the last time series event has been received, then a future will be returned for an
+     * incomplete snapshot of the time series events.
+     *
+     * @tparam E TimeSeries class type, e.g. dxfcpp::Candle etc
+     * @param symbol The symbol to subscribe
+     * @param fromTime Time from which events will be added to the snapshot (historical event buffer)
+     * @param toTime The time until which events will be added to the snapshot (historical event buffer)
+     * @param timeout The timeout after which the work completes.
+     * @return A Future with a vector of smart pointers to TimeSeries events
      */
     template <typename E>
     std::future<std::vector<typename E::Ptr>>

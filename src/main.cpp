@@ -7,7 +7,7 @@
 
 #include <DXFeed.hpp>
 
-///
+/// The class that represents Quote processing entity with checking events by type Quote
 struct QuoteProcessor : dxfcpp::AbstractEventCheckingProcessor<dxfcpp::Quote> {
     explicit QuoteProcessor() noexcept = default;
 
@@ -16,7 +16,7 @@ struct QuoteProcessor : dxfcpp::AbstractEventCheckingProcessor<dxfcpp::Quote> {
     static AbstractEventProcessor::Ptr create() { return std::make_shared<QuoteProcessor>(); }
 };
 
-///
+/// The class that represents Candle processing entity with checking events by type Candle
 struct CandleProcessor : dxfcpp::AbstractEventCheckingProcessor<dxfcpp::Candle> {
     explicit CandleProcessor() noexcept = default;
 
@@ -26,9 +26,10 @@ struct CandleProcessor : dxfcpp::AbstractEventCheckingProcessor<dxfcpp::Candle> 
 };
 
 /**
+ * Tests a subscription to Quote events
  *
- * @param c
- * @param symbols
+ * @param c The parent connection pointer
+ * @param symbols The quote symbols
  */
 void testQuoteSubscription(dxfcpp::Connection::Ptr c, std::initializer_list<std::string> symbols) {
     dxfcpp::CompositeProcessor processor({QuoteProcessor::create()});
@@ -44,17 +45,22 @@ void testQuoteSubscription(dxfcpp::Connection::Ptr c, std::initializer_list<std:
     s->onEvent() += [&processor](dxfcpp::Event::Ptr event) -> void { processor.process(event); };
     s->addSymbols(symbols);
 
+    // Prevent automatic unsubscribing from events.
     std::this_thread::sleep_for(std::chrono::seconds(15));
 }
 
 /**
+ * Tests getting a snapshot of candles. Returns the future for a snapshot of candles from some time to some time.
+ * The vector of candles will be sorted in reverse order.
+ * If the timeout occurs before the last candle has been received, then a future will be returned for an incomplete
+ * snapshot of the candles.
  *
- * @param c
- * @param candleSymbol
- * @param fromTime
- * @param toTime
- * @param timeout
- * @return
+ * @param c The parent connection
+ * @param candleSymbol The symbol of candle
+ * @param fromTime Time from which events will be added to the snapshot (historical event buffer)
+ * @param toTime The time until which events will be added to the snapshot (historical event buffer)
+ * @param timeout The timeout after which the work completes.
+ * @return A Future with a vector of smart pointers to Candle events
  */
 std::vector<dxfcpp::Candle::Ptr> testCandleSnapshot(dxfcpp::Connection::Ptr c, const std::string &candleSymbol,
                                                     std::uint64_t fromTime, std::uint64_t toTime, long timeout) {
