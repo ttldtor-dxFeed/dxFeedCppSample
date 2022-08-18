@@ -78,6 +78,7 @@ cmake -G "Visual Studio 14 2015" -A x64 -DCMAKE_BUILD_TYPE=Release ..
 
 ## TBD
 
+- Automatic detection of the current operating system for the correct loading of the bundle with dxFeed C-API.
 - Candle' doxygen comments
 - Summary
 - Profile
