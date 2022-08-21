@@ -22,6 +22,9 @@ extern "C" {
 namespace dxfcpp {
 
 struct OrderBase : public MarketEvent, public Indexed {
+    /// The alias to a type of shared pointer to the OrderBase object
+    using Ptr = std::shared_ptr<OrderBase>;
+
   private:
     /// Transactional event flags
     EventFlagsMask eventFlags_{};
@@ -36,10 +39,16 @@ struct OrderBase : public MarketEvent, public Indexed {
 };
 
 struct Order final : virtual public OrderBase {
+    /// The alias to a type of shared pointer to the Order object
+    using Ptr = std::shared_ptr<Order>;
+
     std::string toString() const override { return std::string(); }
 };
 
 struct SpreadOrder final : virtual public OrderBase {
+    /// The alias to a type of shared pointer to the SpreadOrder object
+    using Ptr = std::shared_ptr<SpreadOrder>;
+
     std::string toString() const override { return std::string(); }
 };
 

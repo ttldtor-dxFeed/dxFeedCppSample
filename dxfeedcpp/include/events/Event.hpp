@@ -63,18 +63,23 @@ struct SharedEntity : public Entity, std::enable_shared_from_this<SharedEntity> 
     }
 };
 
-///
+/// Marks all event types that can be received via dxFeed API.
 struct Event : public SharedEntity {
     ///
     using Ptr = std::shared_ptr<Event>;
 
-    ///
+    /// Returns event symbol that identifies this event type
     virtual const std::string &getEventSymbol() const = 0;
-    ///
+
+    /// Changes event symbol that identifies this event type
     virtual void setEventSymbol(const std::string &) = 0;
-    ///
+
+    /// Returns time when event was created or zero when time is not available.
+    /// Events that are coming from a network connections do not have an embedded event time information and
+    /// this method will return zero for them, meaning that event was received just now.
     virtual std::uint64_t getEventTime() const = 0;
-    ///
+
+    /// Changes event creation time.
     virtual void setEventTime(std::uint64_t) = 0;
 };
 
@@ -85,24 +90,22 @@ struct Event : public SharedEntity {
  * defined by this class.
  */
 struct MarketEvent : public Event {
-    ///
+    /// The alias to a type of shared pointer to the MarketEvent object
     using Ptr = std::shared_ptr<MarketEvent>;
 
-  protected:
-    std::string eventSymbol_;
-    std::uint64_t eventTime_;
+  private:
+    std::string eventSymbol_{};
+    std::uint64_t eventTime_{};
 
   protected:
-    ///
-    MarketEvent() : eventSymbol_{}, eventTime_{} {}
     /**
      *
      * @param eventSymbol
      */
-    explicit MarketEvent(std::string eventSymbol) : eventSymbol_{std::move(eventSymbol)}, eventTime_{} {}
+    explicit MarketEvent(std::string eventSymbol) : eventSymbol_{std::move(eventSymbol)} {}
 
   public:
-    ///
+    /// Returns symbol of this event.
     const std::string &getEventSymbol() const override { return eventSymbol_; }
     /**
      *
@@ -120,7 +123,7 @@ struct MarketEvent : public Event {
 
 ///
 struct Indexed {
-    ///
+    /// The alias to a type of shared pointer to the Indexed object
     using Ptr = std::shared_ptr<Indexed>;
 
     ///
@@ -137,13 +140,13 @@ struct Indexed {
 
 ///
 struct Lasting {
-    ///
+    /// The alias to a type of shared pointer to the Lasting object
     using Ptr = std::shared_ptr<Lasting>;
 };
 
 ///
 struct TimeSeries : public Indexed {
-    ///
+    /// The alias to a type of shared pointer to the TimeSeries object
     using Ptr = std::shared_ptr<TimeSeries>;
 
     ///

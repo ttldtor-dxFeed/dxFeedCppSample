@@ -22,6 +22,9 @@ extern "C" {
 namespace dxfcpp {
 
 struct Greeks final : public MarketEvent, public TimeSeries, public Lasting {
+    /// The alias to a type of shared pointer to the Greeks object
+    using Ptr = std::shared_ptr<Greeks>;
+
   private:
     std::string eventSymbol_{};
     /// Transactional event flags

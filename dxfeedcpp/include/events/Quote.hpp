@@ -29,6 +29,7 @@ namespace dxfcpp {
  * time.
  */
 struct Quote final : public MarketEvent, public Lasting {
+    /// The alias to a type of shared pointer to the Quote object
     using Ptr = std::shared_ptr<Quote>;
 
   private:
@@ -62,8 +63,6 @@ struct Quote final : public MarketEvent, public Lasting {
     OrderScope scope_;
 
   public:
-    Quote() : MarketEvent(), scope_(OrderScope::UNKNOWN) {}
-
     Quote(const Quote &other)
         : MarketEvent(other), time_{other.time_}, sequence_{other.sequence_}, timeNanoPart_{other.timeNanoPart_},
           bidTime_{other.bidTime_}, bidExchangeCode_{other.bidExchangeCode_}, bidPrice_{other.bidPrice_},

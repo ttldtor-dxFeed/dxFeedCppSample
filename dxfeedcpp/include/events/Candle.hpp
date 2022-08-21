@@ -27,17 +27,30 @@ namespace dxfcpp {
  * @details Candle event with open, high, low, close prices and other information for a specific period.
  */
 struct Candle final : public Event, public TimeSeries, public Lasting {
+    /// The alias to a type of shared pointer to the Candle object
     using Ptr = std::shared_ptr<Candle>;
 
   private:
     std::string eventSymbol_{};
     /// Transactional event flags
     EventFlagsMask eventFlags_{};
+
+    /**
+     * Time when event was created or zero when time is not available. The time is nonzero for data events
+     * that are read from historical tape files and from OnDemandService. Events that are coming from a network
+     * connections do not have an embedded event time information and this field will contain zero for them, meaning
+     * that event was received just now.
+     */
     std::uint64_t eventTime_{};
+    /// Unique per-symbol index of this candle
     std::uint64_t index_{};
+    /// Timestamp of this candle in milliseconds
     std::uint64_t time_{};
+    /// Sequence number of this candle; distinguishes candles with same #time_
     std::int32_t sequence_{};
+    /// Total number of original trade (or quote) events in this candle
     std::uint64_t count_{};
+
     double open_{std::numeric_limits<double>::quiet_NaN()};
     double high_{std::numeric_limits<double>::quiet_NaN()};
     double low_{std::numeric_limits<double>::quiet_NaN()};

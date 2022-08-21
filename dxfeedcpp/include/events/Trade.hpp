@@ -32,6 +32,7 @@ namespace dxfcpp {
  * at any given moment of time.
  */
 struct TradeBase : public MarketEvent, public Lasting {
+    /// The alias to a type of shared pointer to the TradeBase object
     using Ptr = std::shared_ptr<TradeBase>;
 
   private:
@@ -129,9 +130,6 @@ struct TradeBase : public MarketEvent, public Lasting {
         }
     }
 
-    /// Creates new Trade or TradeETH without parameters
-    TradeBase() : MarketEvent(), direction_(Direction::UNDEFINED), scope_(OrderScope::UNKNOWN) {}
-
     TradeBase &operator=(const TradeBase &other) = delete;
 
     TradeBase &operator=(TradeBase &&other) = delete;
@@ -209,6 +207,9 @@ struct TradeBase : public MarketEvent, public Lasting {
  * at any given moment of time.
  */
 struct Trade final : public TradeBase {
+    /// The alias to a type of shared pointer to the Trade object
+    using Ptr = std::shared_ptr<Trade>;
+
     /**
      * Creates new trade with the specified event symbol and dxFeed C-API dxf_trade_t
      *
@@ -237,6 +238,9 @@ struct Trade final : public TradeBase {
  * ETH last trade on the market at any given moment of time.
  */
 struct TradeETH final : public TradeBase {
+    /// The alias to a type of shared pointer to the TradeETH object
+    using Ptr = std::shared_ptr<TradeETH>;
+
     /**
      * Creates new trade with the specified event symbol and dxFeed C-API dxf_trade_t
      *

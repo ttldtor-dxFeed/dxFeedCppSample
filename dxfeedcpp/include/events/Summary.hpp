@@ -23,6 +23,9 @@ extern "C" {
 namespace dxfcpp {
 
 struct Summary final : public MarketEvent, public Lasting {
+    /// The alias to a type of shared pointer to the Summary object
+    using Ptr = std::shared_ptr<Summary>;
+
     /// Identifier of the day that this summary represents. Identifier of the day is the number of days passed since
     /// January 1, 1970.
     std::int32_t dayId_{};

@@ -22,6 +22,9 @@ extern "C" {
 namespace dxfcpp {
 
 struct TheoPrice final : public MarketEvent, public TimeSeries, public Lasting {
+    /// The alias to a type of shared pointer to the TheoPrice object
+    using Ptr = std::shared_ptr<TheoPrice>;
+
   private:
     /// Transactional event flags
     EventFlagsMask eventFlags_{};

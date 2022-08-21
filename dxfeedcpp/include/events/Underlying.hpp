@@ -22,6 +22,9 @@ extern "C" {
 namespace dxfcpp {
 
 struct Underlying final : public MarketEvent, public TimeSeries, public Lasting {
+    /// The alias to a type of shared pointer to the Underlying object
+    using Ptr = std::shared_ptr<Underlying>;
+
   private:
     /// Transactional event flags
     EventFlagsMask eventFlags_{};

@@ -22,6 +22,9 @@ extern "C" {
 namespace dxfcpp {
 
 struct Series final : public MarketEvent, public Indexed {
+    /// The alias to a type of shared pointer to the Series object
+    using Ptr = std::shared_ptr<Series>;
+
   private:
     /// Transactional event flags
     EventFlagsMask eventFlags_{};
