@@ -80,7 +80,7 @@ class SubscriptionImpl {
                        const dxf_event_data_t * /* eventData */, int /*dataCount (always 1) */, void * /* userData */)>
         eventListener_{};
 
-    Handler<void(Event::Ptr)> onEvent_{};
+    Handler<void(Event::Ptr)> onEvent_{1};
 
     friend Subscription;
     friend TimeSeriesSubscription;

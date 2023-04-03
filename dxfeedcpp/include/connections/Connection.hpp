@@ -51,9 +51,9 @@ struct Connection final : public std::enable_shared_from_this<Connection> {
     mutable std::recursive_mutex mutex_{};
     dxf_connection_t connectionHandle_ = nullptr;
 
-    Handler<void()> onDisconnect_{};
-    Handler<void(ConnectionStatus, ConnectionStatus)> onConnectionStatusChanged_{};
-    Handler<void()> onClose_{};
+    Handler<void()> onDisconnect_{1};
+    Handler<void(ConnectionStatus, ConnectionStatus)> onConnectionStatusChanged_{1};
+    Handler<void()> onClose_{1};
 
     std::vector<Subscription::WeakPtr> subscriptions_{};
     std::vector<TimeSeriesSubscription::WeakPtr> timeSeriesSubscriptions_{};
