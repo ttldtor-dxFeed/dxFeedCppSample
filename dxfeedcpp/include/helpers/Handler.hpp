@@ -61,7 +61,7 @@ private:
         return std::async(
                 std::launch::async,
                 [this](ArgTypes...args) {
-                    std::lock_guard guard{listenersMutex_};
+                    std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
                     for (auto &listener: listeners_) {
                         listener.second(args...);
