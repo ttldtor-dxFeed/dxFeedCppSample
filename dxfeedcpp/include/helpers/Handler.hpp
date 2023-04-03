@@ -94,7 +94,7 @@ public:
         auto f = handleImpl(args...);
 
         {
-            std::lock_guard guard{mainFuturesMutex_};
+            std::lock_guard<std::recursive_mutex> guard{mainFuturesMutex_};
 
             if (mainFutures_.size() < mainFuturesSize_) {
                 mainFutures_.emplace_back(f);
@@ -121,7 +121,7 @@ public:
      * @return The listener id
      */
     std::size_t add(ListenerType &&listener) {
-        std::lock_guard guard{listenersMutex_};
+        std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
         lastId_++;
         listeners_.emplace(lastId_, std::forward<ListenerType>(listener));
@@ -137,7 +137,7 @@ public:
      * @return The listener id
      */
     std::size_t addLowPriority(ListenerType &&listener) {
-        std::lock_guard guard{listenersMutex_};
+        std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
         lastId_++;
         lowPriorityListeners_.emplace(lastId_, std::forward<ListenerType>(listener));
@@ -168,7 +168,7 @@ public:
      * @param id The listener id
      */
     void remove(std::size_t id) {
-        std::lock_guard guard{listenersMutex_};
+        std::lock_guard<std::recursive_mutex> guard{listenersMutex_};
 
         if (listeners_.count(id) > 0) {
             listeners_.erase(id);
